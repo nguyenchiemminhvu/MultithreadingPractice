@@ -7,7 +7,7 @@
 
 #define NUM_OF_THREADS 5
 
-const char * COMMON_MESSAGES[] = {"SIG_0", "SIG_1", "SIG_2", "SIG_3", "SIG_4"};
+char * COMMON_MESSAGES[] = {"SIG_0", "SIG_1", "SIG_2", "SIG_3", "SIG_4"};
 
 struct ThreadData
 {
@@ -21,7 +21,7 @@ void * DoSomethingInThread(void * arg)
 	if (!data)
 	{
 		printf("In thread error: pointer to NULL data\n");
-		pthread_exit(NULL);
+		return (void *)-1;
 	}
 	
 	int i = 0;
@@ -29,14 +29,11 @@ void * DoSomethingInThread(void * arg)
 	{
 		printf("#%ld : %s\n", data->id, data->message);
 		i++;
-		Sleep(100);
 	}
 	
 	free(data);
 	
-	time_t now;
-	time(&now);
-	return (void*)now;
+	return (void *)0;
 }
 
 int main(int argc, char **argv)
@@ -47,6 +44,11 @@ int main(int argc, char **argv)
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+	
+	size_t stack_size;
+	pthread_attr_setstacksize(&attr, sizeof(long) * NUM_OF_THREADS * 1024);
+	pthread_attr_getstacksize(&attr, &stack_size);
+	printf("Default stack size: %li\n", stack_size);
 	
 	for (long i = 0; i < NUM_OF_THREADS; i++)
 	{
@@ -63,11 +65,11 @@ int main(int argc, char **argv)
 	pthread_attr_destroy(&attr);
 	
 	// prepare places for returning values from threads
-	time_t finished_times[NUM_OF_THREADS];
+	long returning_values[NUM_OF_THREADS];
 	
 	for (int i = 0; i < NUM_OF_THREADS; i++)
 	{
-		res = pthread_join(threads[i], (void *)&finished_times[i]);
+		res = pthread_join(threads[i], (void *)&returning_values[i]);
 		if (res)
 		{
 			printf("ERROR: return code from pthread_join() is %d\n", res);
@@ -76,7 +78,7 @@ int main(int argc, char **argv)
 	
 	for (int i = 0; i < NUM_OF_THREADS; i++)
 	{
-		printf("#%d :%ld - %s\n", i, finished_times[i], asctime(localtime(&finished_times[i])));
+		printf("#%d :%ld\n", i, returning_values[i]);
 	}
 	
 	return 0;
