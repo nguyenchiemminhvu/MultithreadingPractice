@@ -42,25 +42,36 @@ void * DoSomethingInThread(void * arg)
 int main(int argc, char **argv)
 {
 	int res;
+	
 	pthread_t threads[NUM_OF_THREADS];
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+	
 	for (long i = 0; i < NUM_OF_THREADS; i++)
 	{
 		struct ThreadData * data = malloc(sizeof(struct ThreadData));
 		data->id = i;
 		data->message = COMMON_MESSAGES[i];
-		res = pthread_create(&threads[i], NULL, DoSomethingInThread, (void *)data);
+		res = pthread_create(&threads[i], &attr, DoSomethingInThread, (void *)data);
 		if (res)
 		{
 			printf("ERROR: return code from pthread_create() is %d\n", res);
 		}
 	}
 	
+	pthread_attr_destroy(&attr);
+	
 	// prepare places for returning values from threads
 	time_t finished_times[NUM_OF_THREADS];
 	
 	for (int i = 0; i < NUM_OF_THREADS; i++)
 	{
-		pthread_join(threads[i], (void *)&finished_times[i]);
+		res = pthread_join(threads[i], (void *)&finished_times[i]);
+		if (res)
+		{
+			printf("ERROR: return code from pthread_join() is %d\n", res);
+		}
 	}
 	
 	for (int i = 0; i < NUM_OF_THREADS; i++)
