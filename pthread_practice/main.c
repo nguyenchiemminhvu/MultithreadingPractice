@@ -36,7 +36,7 @@ void * DoSomethingInThread(void * arg)
 	
 	time_t now;
 	time(&now);
-	return (void *) now;
+	return (void*)now;
 }
 
 int main(int argc, char **argv)
