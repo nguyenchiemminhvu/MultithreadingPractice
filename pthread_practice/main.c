@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include <string.h>
 #include <windows.h>
 #include <pthread.h>
@@ -32,7 +34,9 @@ void * DoSomethingInThread(void * arg)
 	
 	free(data);
 	
-	pthread_exit(NULL);
+	time_t now;
+	time(&now);
+	return (void *) now;
 }
 
 int main(int argc, char **argv)
@@ -51,10 +55,18 @@ int main(int argc, char **argv)
 		}
 	}
 	
+	// prepare places for returning values from threads
+	time_t finished_times[NUM_OF_THREADS];
+	
 	for (int i = 0; i < NUM_OF_THREADS; i++)
 	{
-		pthread_join(threads[i], NULL);
+		pthread_join(threads[i], (void *)&finished_times[i]);
 	}
-	pthread_exit(NULL);
+	
+	for (int i = 0; i < NUM_OF_THREADS; i++)
+	{
+		printf("#%d :%ld - %s\n", i, finished_times[i], asctime(localtime(&finished_times[i])));
+	}
+	
 	return 0;
 }
