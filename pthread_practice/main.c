@@ -27,6 +27,7 @@ void * DoSomethingInThread(void * arg)
 	{
 		printf("#%ld : %s\n", data->id, data->message);
 		i++;
+		Sleep(100);
 	}
 	
 	free(data);
@@ -50,6 +51,10 @@ int main(int argc, char **argv)
 		}
 	}
 	
+	for (int i = 0; i < NUM_OF_THREADS; i++)
+	{
+		pthread_join(threads[i], NULL);
+	}
 	pthread_exit(NULL);
 	return 0;
 }
