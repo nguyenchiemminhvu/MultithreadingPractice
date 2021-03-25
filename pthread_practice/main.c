@@ -5,6 +5,8 @@
 #include <windows.h>
 #include <pthread.h>
 
+#include "shared.h"
+
 void * DoHelloPThread(void * arg)
 {
 	struct ThreadData
@@ -35,10 +37,6 @@ void * DoHelloPThread(void * arg)
 
 void HelloPThread()
 {
-#ifndef NUM_OF_THREADS
-	#define NUM_OF_THREADS 5
-#endif
-	
 	const char * COMMON_MESSAGES[] = {"SIG_0", "SIG_1", "SIG_2", "SIG_3", "SIG_4"};
 	
 	struct ThreadData
@@ -90,8 +88,6 @@ void HelloPThread()
 	{
 		printf("#%d :%ld\n", i, returning_values[i]);
 	}
-	
-#undef NUM_OF_THREADS
 }
 
 void * DoHelloMutex(void * arg)
@@ -101,18 +97,16 @@ void * DoHelloMutex(void * arg)
 
 void HelloMutex()
 {
-#ifndef NUM_OF_THREADS
-	#define NUM_OF_THREADS 5
-#endif
-
+	struct BankAccount * acc = ConstructBankAccount();
 	
-
-#undef NUM_OF_THREADS
+	printf("%" PRId64 "\n", acc->balance);
+	
+	DestructBankAccount((void *)acc);
 }
 
 int main(int argc, char **argv)
 {
-	HelloPThread();
+	//HelloPThread();
 	HelloMutex();
 	
 	return 0;
