@@ -1,22 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <string.h>
+#include <time.h>
 #include <windows.h>
 #include <pthread.h>
 
-#define NUM_OF_THREADS 5
-
-char * COMMON_MESSAGES[] = {"SIG_0", "SIG_1", "SIG_2", "SIG_3", "SIG_4"};
-
-struct ThreadData
+void * DoHelloPThread(void * arg)
 {
-	long id;
-	char * message;
-};
-
-void * DoSomethingInThread(void * arg)
-{
+	struct ThreadData
+	{
+		long id;
+		char * message;
+	};
+	
 	struct ThreadData *data = (struct ThreadData *)arg;
 	if (!data)
 	{
@@ -31,13 +27,24 @@ void * DoSomethingInThread(void * arg)
 		i++;
 	}
 	
+	free(data->message);
 	free(data);
 	
 	return (void *)0;
 }
 
-int main(int argc, char **argv)
+void HelloPThread()
 {
+#define NUM_OF_THREADS 5
+	
+	const char * COMMON_MESSAGES[] = {"SIG_0", "SIG_1", "SIG_2", "SIG_3", "SIG_4"};
+	
+	struct ThreadData
+	{
+		long id;
+		char * message;
+	};
+
 	int res;
 	
 	pthread_t threads[NUM_OF_THREADS];
@@ -54,8 +61,9 @@ int main(int argc, char **argv)
 	{
 		struct ThreadData * data = malloc(sizeof(struct ThreadData));
 		data->id = i;
-		data->message = COMMON_MESSAGES[i];
-		res = pthread_create(&threads[i], &attr, DoSomethingInThread, (void *)data);
+		data->message = malloc(255);
+		strcpy(data->message, COMMON_MESSAGES[i]);
+		res = pthread_create(&threads[i], &attr, DoHelloPThread, (void *)data);
 		if (res)
 		{
 			printf("ERROR: return code from pthread_create() is %d\n", res);
@@ -80,6 +88,13 @@ int main(int argc, char **argv)
 	{
 		printf("#%d :%ld\n", i, returning_values[i]);
 	}
+	
+#undef NUM_OF_THREADS
+}
+
+int main(int argc, char **argv)
+{
+	HelloPThread();
 	
 	return 0;
 }
