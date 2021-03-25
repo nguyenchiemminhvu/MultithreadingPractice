@@ -9,42 +9,21 @@
 
 void * DoHelloPThread(void * arg)
 {
-	struct ThreadData
-	{
-		long id;
-		char * message;
-	};
-	
-	struct ThreadData *data = (struct ThreadData *)arg;
+	struct ThreadSig *data = (struct ThreadSig *)arg;
 	if (!data)
 	{
-		printf("In thread error: pointer to NULL data\n");
+		printf("ERROR: pointer to NULL data\n");
 		return (void *)-1;
 	}
 	
-	int i = 0;
-	while (i < 10)
-	{
-		printf("#%ld : %s\n", data->id, data->message);
-		i++;
-	}
-	
-	free(data->message);
-	free(data);
+	data->message = COMMON_MESSAGES[data->id];
+	printf("Handle message %s in thread %d\n", data->message, data->id);
 	
 	return (void *)0;
 }
 
 void HelloPThread()
 {
-	const char * COMMON_MESSAGES[] = {"SIG_0", "SIG_1", "SIG_2", "SIG_3", "SIG_4"};
-	
-	struct ThreadData
-	{
-		long id;
-		char * message;
-	};
-
 	int res;
 	
 	pthread_t threads[NUM_OF_THREADS];
@@ -52,17 +31,10 @@ void HelloPThread()
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 	
-	size_t stack_size;
-	pthread_attr_setstacksize(&attr, sizeof(long) * NUM_OF_THREADS * 1024);
-	pthread_attr_getstacksize(&attr, &stack_size);
-	printf("Default stack size: %li\n", stack_size);
-	
 	for (long i = 0; i < NUM_OF_THREADS; i++)
 	{
-		struct ThreadData * data = malloc(sizeof(struct ThreadData));
+		struct ThreadSig * data = malloc(sizeof(struct ThreadSig));
 		data->id = i;
-		data->message = malloc(255);
-		strcpy(data->message, COMMON_MESSAGES[i]);
 		res = pthread_create(&threads[i], &attr, DoHelloPThread, (void *)data);
 		if (res)
 		{
@@ -72,12 +44,10 @@ void HelloPThread()
 	
 	pthread_attr_destroy(&attr);
 	
-	// prepare places for returning values from threads
-	long returning_values[NUM_OF_THREADS];
-	
+	long returning_data[NUM_OF_THREADS];
 	for (int i = 0; i < NUM_OF_THREADS; i++)
 	{
-		res = pthread_join(threads[i], (void *)&returning_values[i]);
+		res = pthread_join(threads[i], (void *)&returning_data[i]);
 		if (res)
 		{
 			printf("ERROR: return code from pthread_join() is %d\n", res);
@@ -86,18 +56,55 @@ void HelloPThread()
 	
 	for (int i = 0; i < NUM_OF_THREADS; i++)
 	{
-		printf("#%d :%ld\n", i, returning_values[i]);
+		printf("#%d : %d\n",i , returning_data[i]);
 	}
 }
 
 void * DoHelloMutex(void * arg)
 {
-	return (void *)0;
+	struct BankAccount * acc = (struct BankAccount *) arg;
+	if (!acc)
+		return (void *) -1;
+	
+	for (int i = 0; i < 10; i++)
+	{
+		acc->BankAccountDeposit(acc, 100);
+	}
+	
+	return (void *) 0;
 }
 
 void HelloMutex()
 {
+	int res;
+	
+	pthread_t threads[NUM_OF_THREADS];
+	
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+	
 	struct BankAccount * acc = ConstructBankAccount();
+	
+	for (int i = 0; i < NUM_OF_THREADS; i++)
+	{
+		res = pthread_create(&threads[i], &attr, DoHelloMutex, (void *)acc);
+		if (res)
+		{
+			printf("ERROR: return code from pthread_create() is %d\n", res);
+		}
+	}
+	
+	pthread_attr_destroy(&attr);
+	
+	for (int i = 0; i < NUM_OF_THREADS; i++)
+	{
+		res = pthread_join(threads[i], NULL);
+		if (res)
+		{
+			printf("ERROR: return code from pthread_join() is %d\n", res);
+		}
+	}
 	
 	printf("%" PRId64 "\n", acc->balance);
 	
@@ -106,7 +113,7 @@ void HelloMutex()
 
 int main(int argc, char **argv)
 {
-	//HelloPThread();
+	HelloPThread();
 	HelloMutex();
 	
 	return 0;

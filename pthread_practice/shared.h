@@ -11,6 +11,16 @@
 	#define NUM_OF_THREADS 5
 #endif
 
+const char * COMMON_MESSAGES[] = {"SIG_0", "SIG_1", "SIG_2", "SIG_3", "SIG_4"};
+
+struct ThreadSig
+{
+	long id;
+	char * message;
+};
+
+//////////////////////////////////////////////////////////////////////////////////////
+
 struct BankAccount * ConstructBankAccount();
 void DestructBankAccount(void *arg);
 
@@ -53,7 +63,9 @@ void BankAccount_Deposit(void *arg, int amount)
 	if (!acc)
 		return;
 	
+	pthread_mutex_lock(&acc->mutex);
 	acc->balance += amount;
+	pthread_mutex_unlock(&acc->mutex);
 }
 
 struct BankAccount * ConstructBankAccount()
@@ -77,6 +89,7 @@ void DestructBankAccount(void *arg)
 	if (!acc)
 		return;
 	
+	pthread_mutex_destroy(&acc->mutex);
 	free(acc);
 }
 
