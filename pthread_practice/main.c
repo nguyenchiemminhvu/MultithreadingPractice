@@ -35,7 +35,9 @@ void * DoHelloPThread(void * arg)
 
 void HelloPThread()
 {
-#define NUM_OF_THREADS 5
+#ifndef NUM_OF_THREADS
+	#define NUM_OF_THREADS 5
+#endif
 	
 	const char * COMMON_MESSAGES[] = {"SIG_0", "SIG_1", "SIG_2", "SIG_3", "SIG_4"};
 	
@@ -92,9 +94,26 @@ void HelloPThread()
 #undef NUM_OF_THREADS
 }
 
+void * DoHelloMutex(void * arg)
+{
+	return (void *)0;
+}
+
+void HelloMutex()
+{
+#ifndef NUM_OF_THREADS
+	#define NUM_OF_THREADS 5
+#endif
+
+	
+
+#undef NUM_OF_THREADS
+}
+
 int main(int argc, char **argv)
 {
 	HelloPThread();
+	HelloMutex();
 	
 	return 0;
 }
