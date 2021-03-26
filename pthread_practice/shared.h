@@ -151,7 +151,7 @@ void * CocaFactory_Producing(void * arg)
 		
 		Sleep(10);
 		_fact->num_of_products++;
-		printf("produced 1 product\n");
+		printf("produced %d product(s)\n", _fact->num_of_products);
 		
 		if (_fact->num_of_products >= COCA_PACKAGE_SIZE)
 		{
