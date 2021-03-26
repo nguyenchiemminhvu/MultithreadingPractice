@@ -7,6 +7,23 @@
 
 #include "shared.h"
 
+void * DoSimpleThread(void * arg)
+{
+	for (int i = 0; i < 10; i++)
+	{
+		printf("Do something in simple thread, don't care about the result...\n");
+	}
+	
+	return (void *)0;
+}
+
+void CreateSimpleThread()
+{
+	pthread_t T;
+	int res = pthread_create(&T, NULL, DoSimpleThread, (void *)0);
+	Sleep(100);
+}
+
 void * DoHelloPThread(void * arg)
 {
 	struct ThreadSig *data = (struct ThreadSig *)arg;
@@ -113,8 +130,12 @@ void HelloMutex()
 
 int main(int argc, char **argv)
 {
-	HelloPThread();
-	HelloMutex();
+	//CreateSimpleThread();
+	//HelloPThread();
+	//HelloMutex();
 	
+	RunCocaFactory();
+	
+	pthread_exit(NULL);
 	return 0;
 }

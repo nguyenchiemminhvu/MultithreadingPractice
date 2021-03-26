@@ -11,7 +11,7 @@
 	#define NUM_OF_THREADS 5
 #endif
 
-const char * COMMON_MESSAGES[] = {"SIG_0", "SIG_1", "SIG_2", "SIG_3", "SIG_4"};
+char * COMMON_MESSAGES[] = {"SIG_0", "SIG_1", "SIG_2", "SIG_3", "SIG_4"};
 
 struct ThreadSig
 {
@@ -91,6 +91,204 @@ void DestructBankAccount(void *arg)
 	
 	pthread_mutex_destroy(&acc->mutex);
 	free(acc);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+const int COCA_PACKAGE_SIZE = 12;
+const int COCA_PACKAGE_PRICE = 120;
+
+struct CocaFactory
+{
+	int num_of_products;
+	int num_of_packages;
+	int total_income;
+	int ready_to_pack;
+	int ready_to_consume;
+	
+	pthread_t t_producing;
+	pthread_t t_packing;
+	pthread_t t_consuming;
+	
+	pthread_mutex_t m_producing_packing;
+	pthread_mutex_t m_packing_consuming;
+	
+	pthread_cond_t c_producing_packing;
+	pthread_cond_t c_packing_consuming;
+};
+
+void * CocaFactory_Producing(void * arg)
+{
+	struct CocaFactory * _fact = (struct CocaFactory *)arg;
+	if (!_fact)
+	{
+		printf("ERROR: can not start produing!\n");
+		return (void *)-1;
+	}
+	
+	while (1)
+	{
+		pthread_mutex_lock(&_fact->m_producing_packing);
+		while (_fact->ready_to_pack == 1)
+		{
+			pthread_cond_wait(&_fact->c_producing_packing, &_fact->m_producing_packing);
+		}
+		
+		Sleep(10);
+		_fact->num_of_products++;
+		printf("produced 1 product\n");
+		
+		if (_fact->num_of_products >= COCA_PACKAGE_SIZE)
+		{
+			_fact->ready_to_pack = 1;
+			pthread_cond_signal(&_fact->c_producing_packing);
+		}
+		
+		pthread_mutex_unlock(&_fact->m_producing_packing);
+	}
+	
+	return (void *)0;
+}
+
+void * CocaFactory_Packing(void * arg)
+{
+	struct CocaFactory * _fact = (struct CocaFactory *)arg;
+	if (!_fact)
+	{
+		printf("ERROR: can not start packing!\n");
+		return (void *)-1;
+	}
+	
+	while (1)
+	{
+		pthread_mutex_lock(&_fact->m_producing_packing);
+		
+		while (_fact->ready_to_pack == 0)
+		{
+			pthread_cond_wait(&_fact->c_producing_packing, &_fact->m_producing_packing);
+		}
+		
+		Sleep(10);
+		_fact->num_of_products -= COCA_PACKAGE_SIZE;
+		_fact->num_of_packages++;
+		printf("%d package(s) ready to consume\n", _fact->num_of_packages);
+		
+		if (_fact->num_of_products < COCA_PACKAGE_SIZE)
+		{
+			_fact->ready_to_pack = 0;
+			pthread_cond_signal(&_fact->c_producing_packing);
+		}
+		
+		pthread_mutex_unlock(&_fact->m_producing_packing);
+		
+		//////////////////////////////////////////////////////////
+		
+		pthread_mutex_lock(&_fact->m_packing_consuming);
+		
+		while (_fact->ready_to_consume == 1)
+		{
+			pthread_cond_wait(&_fact->c_packing_consuming, &_fact->m_packing_consuming);
+		}
+		
+		if (_fact->num_of_packages > 0)
+		{
+			_fact->ready_to_consume = 1;
+			pthread_cond_signal(&_fact->c_packing_consuming);
+		}
+		
+		pthread_mutex_unlock(&_fact->m_packing_consuming);
+	}
+	
+	return (void *)0;
+}
+
+void * CocaFactory_Consuming(void * arg)
+{
+	struct CocaFactory * _fact = (struct CocaFactory *)arg;
+	if (!_fact)
+	{
+		printf("ERROR: can not start consuming!\n");
+		return (void *)-1;
+	}
+	
+	while (1)
+	{
+		pthread_mutex_lock(&_fact->m_packing_consuming);
+		
+		while (_fact->ready_to_consume == 0)
+		{
+			pthread_cond_wait(&_fact->c_packing_consuming, &_fact->m_packing_consuming);
+		}
+		
+		_fact->num_of_packages--;
+		_fact->total_income += COCA_PACKAGE_PRICE;
+		printf("total income: %d\n", _fact->total_income);
+		if (_fact->num_of_packages <= 0)
+		{
+			_fact->ready_to_consume = 0;
+			pthread_cond_signal(&_fact->c_packing_consuming);
+		}
+		
+		pthread_mutex_unlock(&_fact->m_packing_consuming);
+	}
+	
+	return (void *)0;
+}
+
+void CocaFactory_Initialize(void *arg)
+{
+	struct CocaFactory * _fact = (struct CocaFactory *)arg;
+	if (!_fact)
+		return;
+		
+	_fact->num_of_products = 0;
+	_fact->num_of_packages = 0;
+	_fact->total_income = 0;
+	_fact->ready_to_pack = 0;
+	_fact->ready_to_consume = 0;
+	
+	pthread_mutex_init(&_fact->m_producing_packing, NULL);
+	pthread_mutex_init(&_fact->m_packing_consuming, NULL);
+	
+	pthread_cond_init(&_fact->c_producing_packing, NULL);
+	pthread_cond_init(&_fact->c_packing_consuming, NULL);
+}
+
+void CocaFactory_StartProducing(void * arg)
+{
+	struct CocaFactory * _fact = (struct CocaFactory *)arg;
+	if (!_fact)
+		return;
+	
+	pthread_create(&_fact->t_producing, NULL, CocaFactory_Producing, (void *)_fact);
+}
+
+void CocaFactory_StartPacking(void * arg)
+{
+	struct CocaFactory * _fact = (struct CocaFactory *)arg;
+	if (!_fact)
+		return;
+	
+	pthread_create(&_fact->t_packing, NULL, CocaFactory_Packing, (void *)_fact);
+}
+
+void CocaFactory_StartConsuming(void * arg)
+{
+	struct CocaFactory * _fact = (struct CocaFactory *)arg;
+	if (!_fact)
+		return;
+	
+	pthread_create(&_fact->t_consuming, NULL, CocaFactory_Consuming, (void *)_fact);
+}
+
+void RunCocaFactory()
+{
+	static struct CocaFactory _fact;
+	
+	CocaFactory_Initialize((void *)&_fact);
+	CocaFactory_StartProducing((void *)&_fact);
+	CocaFactory_StartPacking((void *)&_fact);
+	CocaFactory_StartConsuming((void *)&_fact);
 }
 
 #endif // __SHARED_H__
