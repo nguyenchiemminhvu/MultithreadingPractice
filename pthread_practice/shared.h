@@ -118,7 +118,6 @@ struct CocaFactory
 	int total_income;
 	
 	int ready_to_pack;
-	int ready_to_consume;
 	
 	pthread_t t_producing;
 	pthread_t t_packing;
@@ -128,7 +127,6 @@ struct CocaFactory
 	pthread_mutex_t m_packing_consuming;
 	
 	pthread_cond_t c_producing_packing;
-	pthread_cond_t c_packing_consuming;
 };
 
 void * CocaFactory_Producing(void * arg)
@@ -195,23 +193,6 @@ void * CocaFactory_Packing(void * arg)
 		}
 		
 		pthread_mutex_unlock(&_fact->m_producing_packing);
-		
-		//////////////////////////////////////////////////////////
-		
-		pthread_mutex_lock(&_fact->m_packing_consuming);
-		
-		while (_fact->ready_to_consume == true)
-		{
-			pthread_cond_wait(&_fact->c_packing_consuming, &_fact->m_packing_consuming);
-		}
-		
-		if (_fact->num_of_packages > 0)
-		{
-			_fact->ready_to_consume = true;
-			pthread_cond_signal(&_fact->c_packing_consuming);
-		}
-		
-		pthread_mutex_unlock(&_fact->m_packing_consuming);
 	}
 	
 	return (void *)0;
@@ -227,24 +208,18 @@ void * CocaFactory_Consuming(void * arg)
 	}
 	
 	while (1)
-	{
-		pthread_mutex_lock(&_fact->m_packing_consuming);
-		
-		while (_fact->ready_to_consume == false)
+	{	
+		if (_fact->num_of_packages > 0)
 		{
-			pthread_cond_wait(&_fact->c_packing_consuming, &_fact->m_packing_consuming);
+			Sleep(500);
+			
+			pthread_mutex_lock(&_fact->m_packing_consuming);
+			_fact->num_of_packages--;
+			pthread_mutex_unlock(&_fact->m_packing_consuming);
+			
+			_fact->total_income += COCA_PACKAGE_PRICE;
+			printf("total income: %d\n", _fact->total_income);			
 		}
-		
-		_fact->num_of_packages--;
-		_fact->total_income += COCA_PACKAGE_PRICE;
-		printf("total income: %d\n", _fact->total_income);
-		if (_fact->num_of_packages <= 0)
-		{
-			_fact->ready_to_consume = false;
-			pthread_cond_signal(&_fact->c_packing_consuming);
-		}
-		
-		pthread_mutex_unlock(&_fact->m_packing_consuming);
 	}
 	
 	return (void *)0;
@@ -260,13 +235,11 @@ void CocaFactory_Initialize(void * arg)
 	_fact->num_of_packages = 0;
 	_fact->total_income = 0;
 	_fact->ready_to_pack = 0;
-	_fact->ready_to_consume = 0;
 	
 	pthread_mutex_init(&_fact->m_producing_packing, NULL);
 	pthread_mutex_init(&_fact->m_packing_consuming, NULL);
 	
 	pthread_cond_init(&_fact->c_producing_packing, NULL);
-	pthread_cond_init(&_fact->c_packing_consuming, NULL);
 }
 
 void CocaFactory_Uninitialize(void * arg)
@@ -279,7 +252,6 @@ void CocaFactory_Uninitialize(void * arg)
 	pthread_mutex_destroy(&_fact->m_packing_consuming);
 	
 	pthread_cond_destroy(&_fact->c_producing_packing);
-	pthread_cond_destroy(&_fact->c_packing_consuming);
 }
 
 void CocaFactory_StartProducing(void * arg)
