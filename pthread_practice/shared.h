@@ -98,6 +98,16 @@ void DestructBankAccount(void *arg)
 const int COCA_PACKAGE_SIZE = 12;
 const int COCA_PACKAGE_PRICE = 120;
 
+void * CocaFactory_Producing(void * arg);
+void * CocaFactory_Packing(void * arg);
+void * CocaFactory_Consuming(void * arg);
+
+void CocaFactory_Initialize(void *arg);
+void CocaFactory_StartProducing(void * arg);
+void CocaFactory_StartPacking(void * arg);
+void CocaFactory_StartConsuming(void * arg);
+void RunCocaFactory();
+
 struct CocaFactory
 {
 	int num_of_products;
