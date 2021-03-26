@@ -299,6 +299,10 @@ void RunCocaFactory()
 	CocaFactory_StartProducing((void *)&_fact);
 	CocaFactory_StartPacking((void *)&_fact);
 	CocaFactory_StartConsuming((void *)&_fact);
+	
+	pthread_join(_fact.t_producing, NULL);
+	pthread_join(_fact.t_packing, NULL);
+	pthread_join(_fact.t_consuming, NULL);
 }
 
 #endif // __SHARED_H__

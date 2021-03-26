@@ -136,6 +136,5 @@ int main(int argc, char **argv)
 	
 	RunCocaFactory();
 	
-	pthread_exit(NULL);
 	return 0;
 }
