@@ -57,7 +57,9 @@ void BankAccount_Withdraw(void *arg, int amount)
 	if (!acc)
 		return;
 	
+	pthread_mutex_lock(&acc->mutex);
 	acc->balance -= amount;
+	pthread_mutex_unlock(&acc->mutex);
 }
 
 void BankAccount_Deposit(void *arg, int amount)
