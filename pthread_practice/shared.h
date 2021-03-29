@@ -142,7 +142,7 @@ void * CocaFactory_Producing(void * arg)
 	{
 		pthread_mutex_lock(&_fact->m_producing_packing);
 		
-		while (_fact->ready_to_pack == true)
+		while (_fact->ready_to_pack != false)
 		{
 			pthread_cond_wait(&_fact->c_producing_packing, &_fact->m_producing_packing);
 		}
@@ -176,7 +176,7 @@ void * CocaFactory_Packing(void * arg)
 	{
 		pthread_mutex_lock(&_fact->m_producing_packing);
 		
-		while (_fact->ready_to_pack == false)
+		while (_fact->ready_to_pack != true)
 		{
 			pthread_cond_wait(&_fact->c_producing_packing, &_fact->m_producing_packing);
 		}
