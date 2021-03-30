@@ -1,1 +1,1 @@
-g++ -std=c++11 main.cpp -o debug -pthread
+g++ -std=c++11 main.cpp -o debug -pthread -lrt
