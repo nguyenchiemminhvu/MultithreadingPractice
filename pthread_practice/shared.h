@@ -21,6 +21,8 @@
 #define true (1)
 #define false (0)
 
+/////////////////////////////////////////////////////////////////////////////////////
+
 void * DoSimpleThread(void * arg)
 {
 	for (int i = 0; i < 10; i++)
@@ -31,7 +33,7 @@ void * DoSimpleThread(void * arg)
 	return (void *)0;
 }
 
-void CreateSimpleThread()
+void HelloPThread()
 {
 	pthread_t T;
 	int res = pthread_create(&T, NULL, DoSimpleThread, (void *)0);
@@ -416,7 +418,11 @@ void CocaFactory_StartProducing(void * arg)
 	if (!_fact)
 		return;
 	
-	pthread_create(&_fact->t_producing, NULL, CocaFactory_Producing, (void *)_fact);
+	int res = pthread_create(&_fact->t_producing, NULL, CocaFactory_Producing, (void *)_fact);
+	if (res)
+	{
+		printf("ERROR: return code from pthread_create() is %d\n", res);
+	}
 }
 
 void CocaFactory_StartPacking(void * arg)
@@ -425,7 +431,11 @@ void CocaFactory_StartPacking(void * arg)
 	if (!_fact)
 		return;
 	
-	pthread_create(&_fact->t_packing, NULL, CocaFactory_Packing, (void *)_fact);
+	int res = pthread_create(&_fact->t_packing, NULL, CocaFactory_Packing, (void *)_fact);
+	if (res)
+	{
+		printf("ERROR: return code from pthread_create() is %d\n", res);
+	}
 }
 
 void CocaFactory_StartConsuming(void * arg)
@@ -434,7 +444,11 @@ void CocaFactory_StartConsuming(void * arg)
 	if (!_fact)
 		return;
 	
-	pthread_create(&_fact->t_consuming, NULL, CocaFactory_Consuming, (void *)_fact);
+	int res = pthread_create(&_fact->t_consuming, NULL, CocaFactory_Consuming, (void *)_fact);
+	if (res)
+	{
+		printf("ERROR: return code from pthread_create() is %d\n", res);
+	}
 }
 
 void RunCocaFactory()
@@ -456,6 +470,14 @@ void RunCocaFactory()
 
 /////////////////////////////////////////////////////////////////////////////////
 
+void * TestMiniMart(void * arg)
+{
+	return (void *)0;
+}
 
+void RunMiniMart()
+{
+	
+}
 
 #endif // __SHARED_H__

@@ -2,11 +2,11 @@
 
 int main(int argc, char **argv)
 {
-	//CreateSimpleThread();
+	//HelloPThread();
 	//HandleSignals();
 	//RunBankAccount();
 	//RunCocaFactory();
-	
+	RunMiniMart();
 	
 	return 0;
 }
