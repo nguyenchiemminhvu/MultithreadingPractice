@@ -3,9 +3,16 @@
 #ifndef __SHARED_H__
 #define __SHARED_H__
 
+#include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <windows.h>
+
 #include <pthread.h>
+#include <semaphore.h>
 
 #ifndef NUM_OF_THREADS
 	#define NUM_OF_THREADS 5
@@ -96,6 +103,36 @@ void DestructBankAccount(void *arg)
 	
 	pthread_mutex_destroy(&acc->mutex);
 	free(acc);
+}
+
+void * DoBankAccountDeposit(void * arg)
+{
+	struct BankAccount * acc = (struct BankAccount *) arg;
+	if (!acc)
+		return (void *) -1;
+	
+	for (int i = 0; i < 10; i++)
+	{
+		printf("Deposit %d into account\n", 100);
+		acc->BankAccountDeposit(acc, 100);
+	}
+	
+	return (void *) 0;
+}
+
+void * DoBankAccountWithdraw(void * arg)
+{
+	struct BankAccount * acc = (struct BankAccount *) arg;
+	if (!acc)
+		return (void *) -1;
+	
+	for (int i = 0; i < 10; i++)
+	{
+		printf("Withdraw %d from account\n", 100);
+		acc->BankAccountWithdraw(acc, 100);
+	}
+	
+	return (void *) 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -299,5 +336,9 @@ void RunCocaFactory()
 	
 	CocaFactory_Uninitialize((void *)&_fact);
 }
+
+/////////////////////////////////////////////////////////////////////////////////
+
+
 
 #endif // __SHARED_H__

@@ -1,10 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <windows.h>
-#include <pthread.h>
-
 #include "shared.h"
 
 void * DoSimpleThread(void * arg)
@@ -77,21 +70,7 @@ void HelloPThread()
 	}
 }
 
-void * DoHelloMutex(void * arg)
-{
-	struct BankAccount * acc = (struct BankAccount *) arg;
-	if (!acc)
-		return (void *) -1;
-	
-	for (int i = 0; i < 10; i++)
-	{
-		acc->BankAccountDeposit(acc, 100);
-	}
-	
-	return (void *) 0;
-}
-
-void HelloMutex()
+void RunBankAccount()
 {
 	int res;
 	
@@ -105,7 +84,15 @@ void HelloMutex()
 	
 	for (int i = 0; i < NUM_OF_THREADS; i++)
 	{
-		res = pthread_create(&threads[i], &attr, DoHelloMutex, (void *)acc);
+		if (i % 2 == 0)
+		{
+			res = pthread_create(&threads[i], &attr, DoBankAccountDeposit, (void *)acc);
+		}
+		else
+		{
+			res = pthread_create(&threads[i], &attr, DoBankAccountWithdraw, (void *)acc);
+		}
+		
 		if (res)
 		{
 			printf("ERROR: return code from pthread_create() is %d\n", res);
@@ -132,9 +119,10 @@ int main(int argc, char **argv)
 {
 	//CreateSimpleThread();
 	//HelloPThread();
-	//HelloMutex();
+	//RunBankAccount();
+	//RunCocaFactory();
 	
-	RunCocaFactory();
+	
 	
 	return 0;
 }
