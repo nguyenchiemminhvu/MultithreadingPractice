@@ -6,7 +6,6 @@ int main(int argc, char **argv)
 	//HandleSignals();
 	//RunBankAccount();
 	//RunCocaFactory();
-	RunMiniMart();
 	
 	return 0;
 }

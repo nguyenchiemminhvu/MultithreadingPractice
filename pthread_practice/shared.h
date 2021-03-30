@@ -10,6 +10,7 @@
 #include <string.h>
 #include <time.h>
 #include <windows.h>
+#include <fcntl.h>
 
 #include <pthread.h>
 #include <semaphore.h>
@@ -470,14 +471,6 @@ void RunCocaFactory()
 
 /////////////////////////////////////////////////////////////////////////////////
 
-void * TestMiniMart(void * arg)
-{
-	return (void *)0;
-}
 
-void RunMiniMart()
-{
-	
-}
 
 #endif // __SHARED_H__
