@@ -9,7 +9,7 @@ int main()
 	auto f = []() { 
 		for (int i = 0; i < 10; i++) 
 			std::cout << std::this_thread::get_id() << std::endl; 
-		std::this_thread::sleep_for(10ms);
+		std::this_thread::sleep_for(20ms);
 	};
 	std::thread t3(f);
 
