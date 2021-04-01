@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <stack>
+#include <queue>
 #include <string>
 #include <ctime>
 #include <thread>
@@ -188,7 +190,7 @@ namespace RaceCondition
 
 namespace WorkingWithCondition
 {
-	class UserCommand
+	class UserCommandList
 	{
 	public:
 		const std::string GET_CURRENT_TIME = "get_current_time";
@@ -198,11 +200,12 @@ namespace WorkingWithCondition
 	class SampleWorker
 	{
 		std::mutex m_mutex;
-
+		time_t t_beginning;
 		bool b_initialized;
 		std::condition_variable c_initialized;
 
-		std::chrono::system_clock::time_point tp_beginning;
+		UserCommandList l_commands;
+		std::queue<std::string> q_commands;
 
 	public:
 
@@ -226,6 +229,8 @@ namespace WorkingWithCondition
 			
 			if (handler.joinable())
 				handler.join();
+
+			WriteLog();
 		}
 
 		void StartListener()
@@ -236,23 +241,49 @@ namespace WorkingWithCondition
 
 		void StartHandler()
 		{
+			while (true)
+			{
+				while (!q_commands.empty())
+				{
+					std::string command = q_commands.front();
+					q_commands.pop();
 
+					if (command == l_commands.GET_CURRENT_TIME)
+					{
+						PrintCurrentTime();
+					}
+					else if (command == l_commands.EXIT)
+					{
+						Exit();
+					}
+				}
+			}
 		}
 
 		void ListenUserCommand()
 		{
+			while (true)
+			{
+				std::string command;
+				getline(std::cin, command);
 
+				if (!command.empty())
+				{
+					q_commands.push(command);
+				}
+			}
 		}
 
 		void PrintCurrentTime()
 		{
-			auto now = std::chrono::system_clock::now();
-			auto t_now = std::chrono::system_clock::to_time_t(now);
+			time_t t_now;
+			time(&t_now);
 			std::cout << asctime(localtime(&t_now)) << std::endl;
 		}
 
 		void Exit()
 		{
+			WriteLog();
 			exit(1);
 		}
 
@@ -260,14 +291,29 @@ namespace WorkingWithCondition
 		
 		void Initialize()
 		{
-			tp_beginning = std::chrono::system_clock::now();
-			ClearLogFile();
+			time(&t_beginning);
+			CreateLogFile();
 		}
 
-		void ClearLogFile()
+		void CreateLogFile()
 		{
 			std::ofstream out;
-			out.open("log.txt", std::ios::out | std::ios::trunc);
+			out.open("log.txt", std::ios::out | std::ios::app);
+			out.close();
+		}
+
+		void WriteLog()
+		{
+			std::ofstream out;
+			out.open("log.txt", std::ios::out | std::ios::app);
+
+			time_t t_now;
+			time(&t_now);
+
+			out << "Start session: " << asctime(localtime(&t_beginning));
+			out << "End session: " << asctime(localtime(&t_now));
+			out << std::endl;
+
 			out.close();
 		}
 	};
