@@ -10,10 +10,11 @@
 #include <string.h>
 #include <time.h>
 #include <windows.h>
-#include <fcntl.h>
 
 #include <pthread.h>
 #include <semaphore.h>
+#include <fcntl.h>
+#include <errno.h>
 
 #ifndef NUM_OF_THREADS
 	#define NUM_OF_THREADS 5
@@ -470,7 +471,75 @@ void RunCocaFactory()
 }
 
 /////////////////////////////////////////////////////////////////////////////////
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#define CLOCK_REALTIME 0
 
+static int clock_gettime(int type, struct timespec *spec)      //C-file part
+{
+	__int64 wintime; GetSystemTimeAsFileTime((FILETIME*)&wintime);
+	wintime -= 116444736000000000;  //1jan1601 to 1jan1970
+	spec->tv_sec = wintime / 10000000;           //seconds
+	spec->tv_nsec = wintime % 10000000 * 100;      //nano-seconds
+	return 0;
+}
 
+struct SampleWorker
+{
+	sem_t s_loaded;
+};
+
+void SampleWorker_Initialize(void * arg)
+{
+	struct SampleWorker * worker = (struct SampleWorker *)arg;
+	if (!worker)
+		return;
+	
+	sem_init(&worker->s_loaded, 0, 1);
+}
+
+void * SampleWorker_DoSomethingInThreeSeconds(void * arg)
+{
+	struct SampleWorker * worker = (struct SampleWorker *)arg;
+	if (!worker)
+		return (void *)-1;
+	
+	sem_wait(&worker->s_loaded);
+	printf("Do something in 3 seconds...\n");
+	Sleep(4000); // assume this heavy job need to done in more than 3 seconds
+	sem_post(&worker->s_loaded);
+	
+	return (void *)0;
+}
+
+void WorkingUnderTimeConstraint()
+{
+	struct SampleWorker worker;
+	SampleWorker_Initialize((void *)&worker);
+	
+	pthread_t thread;
+	int res = pthread_create(&thread, NULL, SampleWorker_DoSomethingInThreeSeconds, (void *)&worker);
+	if (res)
+	{
+		printf("ERROR: return code from pthread_create() is %d\n", res);
+	}
+	
+	struct timespec ts;
+	clock_gettime(CLOCK_REALTIME, &ts);
+	ts.tv_sec += 3;
+	
+	while ((res = sem_timedwait(&worker.s_loaded, &ts)) == -1 && errno == EINTR)
+		continue;
+	
+	if (res == -1)
+	{
+		printf("sem_timedwait() timed out\n");
+	}
+	else
+	{
+		pthread_join(thread, (void *)&res);
+		printf("result that the worker produced: %d\n", res);
+	}
+}
 
 #endif // __SHARED_H__
