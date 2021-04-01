@@ -2,11 +2,15 @@
 
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include <thread>
+#include <mutex>
+
+constexpr int NUM_OF_THREADS = 5;
 
 using namespace std;
 
-namespace sample_threads
+namespace hello_std_thread
 {
 	class SampleWorker
 	{
@@ -67,7 +71,7 @@ namespace sample_threads
 		_n++;
 	}
 
-	void create_sample_threads()
+	void hello_threads()
 	{
 		std::thread t1(sample_thread_func);
 
@@ -110,5 +114,71 @@ namespace sample_threads
 		if (t7.joinable())
 			t7.join();
 		std::cout << "n in main thread after joined thread: " << n << std::endl;
+	}
+}
+
+namespace RaceCondition
+{
+	class BankAccount
+	{
+		int _balance;
+		std::mutex _mutex;
+
+	public:
+
+		BankAccount()
+			: _balance(0)
+		{
+
+		}
+
+		int GetBalance()
+		{
+			return _balance;
+		}
+
+		void Deposit(int amount)
+		{
+			std::lock_guard<std::mutex> locker(_mutex);
+			for (int i = 0; i < amount; i++)
+			{
+				_balance++;
+			}
+		}
+
+		void Withdraw(int amount)
+		{
+			std::lock_guard<std::mutex> locker(_mutex);
+			for (int i = 0; i < amount; i++)
+			{
+				_balance--;
+			}
+		}
+	};
+
+	void TestMultithreadedBankAccount()
+	{
+		BankAccount acc;
+
+		std::vector<std::thread> threads(NUM_OF_THREADS);
+		for (int i = 0; i < NUM_OF_THREADS; i++)
+		{
+			threads.push_back(std::thread(&BankAccount::Deposit, &acc, 100000));
+		}
+
+		try
+		{
+			for (std::thread& t : threads)
+			{
+				if (t.joinable())
+					t.join();
+			}
+		}
+		catch (std::exception e)
+		{
+			std::cout << e.what() << std::endl;
+		}
+
+		std::cout << "Balance in account: " << acc.GetBalance() << std::endl;
 	}
 }

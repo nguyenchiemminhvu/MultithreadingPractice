@@ -2,7 +2,8 @@
 
 int main()
 {
-	sample_threads::create_sample_threads();
+	//hello_std_thread::hello_threads();
+	RaceCondition::TestMultithreadedBankAccount();
 
 	return 0;
 }
