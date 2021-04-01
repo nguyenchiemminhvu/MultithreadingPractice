@@ -197,7 +197,15 @@ namespace WorkingWithCondition
 
 	class SampleWorker
 	{
+		std::mutex m_mutex;
+
+		bool b_initialized;
+		std::condition_variable c_initialized;
+
+		std::chrono::system_clock::time_point tp_beginning;
+
 	public:
+
 		SampleWorker()
 		{
 
@@ -210,15 +218,28 @@ namespace WorkingWithCondition
 
 		void Run()
 		{
+			std::thread listener(&SampleWorker::StartListener, this);
+			std::thread handler(&SampleWorker::StartHandler, this);
 
+			if (listener.joinable())
+				listener.join();
+			
+			if (handler.joinable())
+				handler.join();
 		}
 
-		void InitTiming()
+		void StartListener()
+		{
+			Initialize();
+			ListenUserCommand();
+		}
+
+		void StartHandler()
 		{
 
 		}
 
-		void HandleUserCommand()
+		void ListenUserCommand()
 		{
 
 		}
@@ -233,6 +254,21 @@ namespace WorkingWithCondition
 		void Exit()
 		{
 			exit(1);
+		}
+
+	private:
+		
+		void Initialize()
+		{
+			tp_beginning = std::chrono::system_clock::now();
+			ClearLogFile();
+		}
+
+		void ClearLogFile()
+		{
+			std::ofstream out;
+			out.open("log.txt", std::ios::out | std::ios::trunc);
+			out.close();
 		}
 	};
 
