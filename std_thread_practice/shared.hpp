@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <string>
+#include <ctime>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -186,5 +188,57 @@ namespace RaceCondition
 
 namespace WorkingWithCondition
 {
+	class UserCommand
+	{
+	public:
+		const std::string GET_CURRENT_TIME = "get_current_time";
+		const std::string EXIT = "exit";
+	};
 
+	class SampleWorker
+	{
+	public:
+		SampleWorker()
+		{
+
+		}
+
+		~SampleWorker()
+		{
+
+		}
+
+		void Run()
+		{
+
+		}
+
+		void InitTiming()
+		{
+
+		}
+
+		void HandleUserCommand()
+		{
+
+		}
+
+		void PrintCurrentTime()
+		{
+			auto now = std::chrono::system_clock::now();
+			auto t_now = std::chrono::system_clock::to_time_t(now);
+			std::cout << asctime(localtime(&t_now)) << std::endl;
+		}
+
+		void Exit()
+		{
+			exit(1);
+		}
+	};
+
+	void TestMultithreadWithConditions()
+	{
+		SampleWorker worker;
+		worker.Run();
+	}
 }

@@ -3,7 +3,8 @@
 int main()
 {
 	//hello_std_thread::hello_threads();
-	RaceCondition::TestMultithreadedBankAccount();
+	//RaceCondition::TestMultithreadedBankAccount();
+	WorkingWithCondition::TestMultithreadWithConditions();
 
 	return 0;
 }
