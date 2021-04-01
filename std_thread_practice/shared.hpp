@@ -183,3 +183,8 @@ namespace RaceCondition
 		std::cout << "Balance in account: " << acc.GetBalance() << std::endl;
 	}
 }
+
+namespace WorkingWithCondition
+{
+
+}
