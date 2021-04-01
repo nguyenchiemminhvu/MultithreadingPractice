@@ -484,6 +484,9 @@ static int clock_gettime(int type, struct timespec *spec)      //C-file part
 	return 0;
 }
 
+void SampleWorker_Initialize(void * arg);
+void * SampleWorker_DoSomethingInThreeSeconds(void * arg);
+
 struct SampleWorker
 {
 	sem_t s_loaded;
