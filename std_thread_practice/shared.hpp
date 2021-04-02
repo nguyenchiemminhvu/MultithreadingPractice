@@ -415,7 +415,7 @@ namespace WorkingWithFuture
 	}
 }
 
-namespace WorkingWithAsync
+namespace WorkingAsynchronously
 {
 	class ASyncWorker
 	{

@@ -6,7 +6,7 @@ int main()
 	//RaceCondition::TestMultithreadedBankAccount();
 	//WorkingWithCondition::TestMultithreadWithConditions();
 	//WorkingWithFuture::DoSomethingWithFuture();
-	WorkingWithAsync::DoSomethingAsynchronously();
+	WorkingAsynchronously::DoSomethingAsynchronously();
 
 	return 0;
 }
