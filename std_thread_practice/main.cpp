@@ -5,7 +5,8 @@ int main()
 	//hello_std_thread::hello_threads();
 	//RaceCondition::TestMultithreadedBankAccount();
 	//WorkingWithCondition::TestMultithreadWithConditions();
-	AsyncExample::DoSomethingWithFuture();
+	//WorkingWithFuture::DoSomethingWithFuture();
+	WorkingWithAsync::DoSomethingAsynchronously();
 
 	return 0;
 }

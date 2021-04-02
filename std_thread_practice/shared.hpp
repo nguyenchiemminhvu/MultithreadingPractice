@@ -366,7 +366,7 @@ namespace WorkingWithCondition
 	}
 }
 
-namespace AsyncExample
+namespace WorkingWithFuture
 {
 	class FutureWorker
 	{
@@ -388,8 +388,8 @@ namespace AsyncExample
 		{
 			std::promise<MinMax> pr;
 			
-
 			std::thread t(&FutureWorker::GetMinMaxInFuture, this, std::ref(pr));
+
 			std::future<MinMax> fu = pr.get_future();
 			MinMax mm = fu.get();
 			std::cout << mm.first << " and " << mm.second << std::endl;
@@ -411,6 +411,55 @@ namespace AsyncExample
 	void DoSomethingWithFuture()
 	{
 		FutureWorker worker;
+		worker.Run();
+	}
+}
+
+namespace WorkingWithAsync
+{
+	class ASyncWorker
+	{
+	public:
+		ASyncWorker()
+		{
+
+		}
+
+		~ASyncWorker()
+		{
+
+		}
+
+		void Run()
+		{
+			std::string param = "user_NCMV";
+
+			std::future<std::string> f_lc = std::async(std::launch::async, &ASyncWorker::FetchFromLocal, this, std::ref(param));
+			std::future<std::string> f_db = std::async(std::launch::async, &ASyncWorker::FetchFromDB, this, std::ref(param));
+
+			std::string lc_res = f_lc.get();
+			std::string db_res = f_db.get();
+
+			std::cout << lc_res << std::endl;
+			std::cout << db_res << std::endl;
+		}
+
+		std::string FetchFromDB(const std::string& param)
+		{
+			std::this_thread::sleep_for(2000ms);
+			return "DB_" + param;
+		}
+
+		std::string FetchFromLocal(const std::string& param)
+		{
+			std::this_thread::sleep_for(2000ms);
+			return "LC_" + param;
+		}
+	};
+
+	void DoSomethingAsynchronously()
+	{
+		ASyncWorker worker;
 		worker.Run();
 	}
 }
