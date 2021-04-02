@@ -434,8 +434,8 @@ namespace WorkingWithAsync
 		{
 			std::string param = "user_NCMV";
 
-			std::future<std::string> f_lc = std::async(std::launch::async, &ASyncWorker::FetchFromLocal, this, std::ref(param));
-			std::future<std::string> f_db = std::async(std::launch::async, &ASyncWorker::FetchFromDB, this, std::ref(param));
+			auto f_lc = std::async(std::launch::async, &ASyncWorker::FetchFromLocal, this, param);
+			auto f_db = std::async(std::launch::async, &ASyncWorker::FetchFromDB, this, param);
 
 			std::string lc_res = f_lc.get();
 			std::string db_res = f_db.get();
