@@ -193,16 +193,20 @@ namespace WorkingWithCondition
 	class UserCommandList
 	{
 	public:
-		const std::string GET_CURRENT_TIME = "get_current_time";
+		const std::string GET_CURRENT_TIME = "time";
+		const std::string RESET_LOG = "reset_log";
 		const std::string EXIT = "exit";
 	};
 
 	class SampleWorker
 	{
-		std::mutex m_mutex;
 		time_t t_beginning;
 		bool b_initialized;
+
+		std::mutex m_mutex_thread;
+		std::mutex m_mutex_queue;
 		std::condition_variable c_initialized;
+		std::condition_variable c_queue_not_empty;
 
 		UserCommandList l_commands;
 		std::queue<std::string> q_commands;
@@ -210,8 +214,9 @@ namespace WorkingWithCondition
 	public:
 
 		SampleWorker()
+			: b_initialized(false)
 		{
-
+			
 		}
 
 		~SampleWorker()
@@ -241,8 +246,15 @@ namespace WorkingWithCondition
 
 		void StartHandler()
 		{
+			std::unique_lock<std::mutex> lock_thread(m_mutex_thread);
+			c_initialized.wait(lock_thread, [=]() { return b_initialized; });
+			std::cout << "Start user event handler" << std::endl;
+
 			while (true)
 			{
+				std::unique_lock<std::mutex> lock_queue(m_mutex_queue);
+				c_queue_not_empty.wait(lock_queue, [=]() { return !q_commands.empty(); });
+
 				while (!q_commands.empty())
 				{
 					std::string command = q_commands.front();
@@ -252,9 +264,17 @@ namespace WorkingWithCondition
 					{
 						PrintCurrentTime();
 					}
+					else if (command == l_commands.RESET_LOG)
+					{
+						ResetLog();
+					}
 					else if (command == l_commands.EXIT)
 					{
 						Exit();
+					}
+					else
+					{
+						std::cout << "Invalid command!" << std::endl;
 					}
 				}
 			}
@@ -269,7 +289,9 @@ namespace WorkingWithCondition
 
 				if (!command.empty())
 				{
+					std::unique_lock<std::mutex> lock_queue(m_mutex_queue);
 					q_commands.push(command);
+					c_queue_not_empty.notify_one(); // notify the handler thread
 				}
 			}
 		}
@@ -293,6 +315,9 @@ namespace WorkingWithCondition
 		{
 			time(&t_beginning);
 			CreateLogFile();
+
+			b_initialized = true;
+			c_initialized.notify_all(); // notify all other threads that the application is ready to use
 		}
 
 		void CreateLogFile()
@@ -314,6 +339,13 @@ namespace WorkingWithCondition
 			out << "End session: " << asctime(localtime(&t_now));
 			out << std::endl;
 
+			out.close();
+		}
+
+		void ResetLog()
+		{
+			std::ofstream out;
+			out.open("log.txt", std::ios::out | std::ios::trunc);
 			out.close();
 		}
 	};
