@@ -365,3 +365,8 @@ namespace WorkingWithCondition
 		worker.Run();
 	}
 }
+
+namespace AsyncExample
+{
+	
+}
