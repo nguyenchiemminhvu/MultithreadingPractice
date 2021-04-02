@@ -368,5 +368,49 @@ namespace WorkingWithCondition
 
 namespace AsyncExample
 {
-	
+	class FutureWorker
+	{
+		using MinMax = std::pair<int, int>;
+
+	public:
+
+		FutureWorker()
+		{
+
+		}
+
+		~FutureWorker()
+		{
+
+		}
+
+		void Run()
+		{
+			std::promise<MinMax> pr;
+			std::future<MinMax> fu = pr.get_future();
+
+			std::thread t(&FutureWorker::GetMinMaxInFile, this, std::ref(pr));
+
+			MinMax mm = fu.get();
+			std::cout << mm.first << " and " << mm.second << std::endl;
+
+			if (t.joinable())
+			{
+				t.join();
+			}
+		}
+
+		void GetMinMaxInFile(std::promise<MinMax> &pr)
+		{
+			std::this_thread::sleep_for(2000ms); // do heavy job
+			pr.set_value(MinMax(1, 99));
+			std::this_thread::sleep_for(2000ms); // do another heavy job
+		}
+	};
+
+	void DoSomethingWithFuture()
+	{
+		FutureWorker worker;
+		worker.Run();
+	}
 }
