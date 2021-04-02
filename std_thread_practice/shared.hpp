@@ -247,8 +247,15 @@ namespace WorkingWithCondition
 		void StartHandler()
 		{
 			std::unique_lock<std::mutex> lock_thread(m_mutex_handler);
-			c_initialized.wait(lock_thread, [=]() { return b_initialized; });
-			std::cout << "Start user event handler" << std::endl;
+			if (c_initialized.wait_for(lock_thread, 1000ms, [=]() { return b_initialized; }))
+			{
+				std::cout << "Start user event handler" << std::endl;
+			}
+			else
+			{
+				std::cout << "Initialization timed out" << std::endl;
+				Exit(-1);
+			}
 
 			while (true)
 			{
@@ -303,10 +310,10 @@ namespace WorkingWithCondition
 			std::cout << asctime(localtime(&t_now)) << std::endl;
 		}
 
-		void Exit()
+		void Exit(int status = 0)
 		{
 			WriteLog();
-			exit(1);
+			exit(status);
 		}
 
 	private:
