@@ -387,10 +387,10 @@ namespace AsyncExample
 		void Run()
 		{
 			std::promise<MinMax> pr;
-			std::future<MinMax> fu = pr.get_future();
+			
 
 			std::thread t(&FutureWorker::GetMinMaxInFuture, this, std::ref(pr));
-
+			std::future<MinMax> fu = pr.get_future();
 			MinMax mm = fu.get();
 			std::cout << mm.first << " and " << mm.second << std::endl;
 
