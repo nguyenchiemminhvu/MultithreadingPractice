@@ -203,7 +203,7 @@ namespace WorkingWithCondition
 		time_t t_beginning;
 		bool b_initialized;
 
-		std::mutex m_mutex_thread;
+		std::mutex m_mutex_handler;
 		std::mutex m_mutex_queue;
 		std::condition_variable c_initialized;
 		std::condition_variable c_queue_not_empty;
@@ -246,7 +246,7 @@ namespace WorkingWithCondition
 
 		void StartHandler()
 		{
-			std::unique_lock<std::mutex> lock_thread(m_mutex_thread);
+			std::unique_lock<std::mutex> lock_thread(m_mutex_handler);
 			c_initialized.wait(lock_thread, [=]() { return b_initialized; });
 			std::cout << "Start user event handler" << std::endl;
 
@@ -316,6 +316,7 @@ namespace WorkingWithCondition
 			time(&t_beginning);
 			CreateLogFile();
 
+			std::unique_lock<std::mutex> lock_thread(m_mutex_handler);
 			b_initialized = true;
 			c_initialized.notify_all(); // notify all other threads that the application is ready to use
 		}
