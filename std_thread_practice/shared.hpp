@@ -404,7 +404,7 @@ namespace AsyncExample
 		{
 			std::this_thread::sleep_for(2000ms); // do heavy job
 			pr.set_value(MinMax(1, 99));
-			std::this_thread::sleep_for(2000ms); // do another heavy job
+			std::this_thread::sleep_for(2000ms); // do heavy job
 		}
 	};
 
