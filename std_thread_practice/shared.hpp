@@ -389,7 +389,7 @@ namespace AsyncExample
 			std::promise<MinMax> pr;
 			std::future<MinMax> fu = pr.get_future();
 
-			std::thread t(&FutureWorker::GetMinMaxInFile, this, std::ref(pr));
+			std::thread t(&FutureWorker::GetMinMaxInFuture, this, std::ref(pr));
 
 			MinMax mm = fu.get();
 			std::cout << mm.first << " and " << mm.second << std::endl;
@@ -400,7 +400,7 @@ namespace AsyncExample
 			}
 		}
 
-		void GetMinMaxInFile(std::promise<MinMax> &pr)
+		void GetMinMaxInFuture(std::promise<MinMax> &pr)
 		{
 			std::this_thread::sleep_for(2000ms); // do heavy job
 			pr.set_value(MinMax(1, 99));
