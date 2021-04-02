@@ -442,6 +442,14 @@ namespace WorkingWithAsync
 
 			std::cout << lc_res << std::endl;
 			std::cout << db_res << std::endl;
+
+			auto func_check = [](std::string lc_user, std::string db_user) -> bool { return lc_user == db_user; };
+			auto f_check = std::async(std::launch::async, func_check, lc_res, db_res);
+			bool b_check = f_check.get();
+			if (!b_check)
+			{
+				std::cout << "Disconnected" << std::endl;
+			}
 		}
 
 		std::string FetchFromDB(const std::string& param)
