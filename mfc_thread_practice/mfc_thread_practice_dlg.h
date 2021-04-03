@@ -19,8 +19,6 @@ public:
 
 	CEdit* GetEditLog();
 	void ClearEditLog();
-	BOOL IsThreadStarted();
-	void SetThreadStatus(BOOL started = false);
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
@@ -41,5 +39,5 @@ protected:
 private:
 
 	CEdit _edit_log;
-	BOOL b_thread_started;
+	CWinThread* _log_thread;
 };

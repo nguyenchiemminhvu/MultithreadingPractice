@@ -17,10 +17,9 @@ UINT SampleThreadProc(LPVOID arg)
 	Sleep(1000);
 
 	mfc_thread_practice_dlg* _dlg = (mfc_thread_practice_dlg*)arg;
-	_dlg->SetThreadStatus(TRUE);
 	_dlg->ClearEditLog();
 
-	while (_dlg->IsThreadStarted())
+	while (true)
 	{
 		CString _log;
 		_log.Format(_T("\r\n%s"), L"Hello, I am another thread");
@@ -36,7 +35,7 @@ UINT SampleThreadProc(LPVOID arg)
 }
 
 mfc_thread_practice_dlg::mfc_thread_practice_dlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_MFC_THREAD_PRACTICE_DIALOG, pParent)
+	: CDialogEx(IDD_MFC_THREAD_PRACTICE_DIALOG, pParent), _log_thread(NULL)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -49,16 +48,6 @@ CEdit* mfc_thread_practice_dlg::GetEditLog()
 void mfc_thread_practice_dlg::ClearEditLog()
 {
 	_edit_log.Clear();
-}
-
-BOOL mfc_thread_practice_dlg::IsThreadStarted()
-{
-	return b_thread_started;
-}
-
-void mfc_thread_practice_dlg::SetThreadStatus(BOOL started)
-{
-	b_thread_started = started;
 }
 
 void mfc_thread_practice_dlg::DoDataExchange(CDataExchange* pDX)
@@ -129,15 +118,21 @@ HCURSOR mfc_thread_practice_dlg::OnQueryDragIcon()
 
 void mfc_thread_practice_dlg::OnButtonStartClicked()
 {	
-	if (!IsThreadStarted())
+	if (!_log_thread)
 	{
 		_edit_log.SetWindowText(L"Start thread");
-		AfxBeginThread(SampleThreadProc, this);
+		_log_thread = AfxBeginThread(SampleThreadProc, this);
 	}
 }
 
 void mfc_thread_practice_dlg::OnButtonStopClicked()
 {
-	SetThreadStatus(FALSE);
-	_edit_log.SetWindowText(L"Stop thread");
+	if (_log_thread)
+	{
+		_log_thread->SuspendThread();
+		_log_thread->ExitInstance();
+		_log_thread->Delete();
+		_log_thread = NULL;
+		_edit_log.SetWindowText(L"Stop thread");
+	}
 }
