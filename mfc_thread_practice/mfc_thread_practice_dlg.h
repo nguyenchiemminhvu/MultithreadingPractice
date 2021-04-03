@@ -17,7 +17,12 @@ public:
 	enum { IDD = IDD_MFC_THREAD_PRACTICE_DIALOG };
 #endif
 
-	protected:
+	CEdit* GetEditLog();
+	void ClearEditLog();
+	BOOL IsThreadStarted();
+	void SetThreadStatus(BOOL started = false);
+
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 
 
@@ -29,5 +34,12 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
+	afx_msg void OnButtonStartClicked();
+	afx_msg void OnButtonStopClicked();
 	DECLARE_MESSAGE_MAP()
+
+private:
+
+	CEdit _edit_log;
+	BOOL b_thread_started;
 };

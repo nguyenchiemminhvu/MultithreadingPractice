@@ -12,10 +12,28 @@
 #define new DEBUG_NEW
 #endif
 
+UINT SampleThreadProc(LPVOID arg)
+{
+	Sleep(1000);
 
-// mfc_thread_practice_dlg dialog
+	mfc_thread_practice_dlg* _dlg = (mfc_thread_practice_dlg*)arg;
+	_dlg->SetThreadStatus(TRUE);
+	_dlg->ClearEditLog();
 
+	while (_dlg->IsThreadStarted())
+	{
+		CString _log;
+		_log.Format(_T("\r\n%s"), L"Hello, I am another thread");
 
+		int _log_length = _dlg->GetEditLog()->GetWindowTextLength();
+		_dlg->GetEditLog()->SetSel(_log_length, _log_length);
+		_dlg->GetEditLog()->ReplaceSel(_log);
+
+		Sleep(1000);
+	}
+
+	return 0;
+}
 
 mfc_thread_practice_dlg::mfc_thread_practice_dlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_MFC_THREAD_PRACTICE_DIALOG, pParent)
@@ -23,14 +41,37 @@ mfc_thread_practice_dlg::mfc_thread_practice_dlg(CWnd* pParent /*=nullptr*/)
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
+CEdit* mfc_thread_practice_dlg::GetEditLog()
+{
+	return &_edit_log;
+}
+
+void mfc_thread_practice_dlg::ClearEditLog()
+{
+	_edit_log.Clear();
+}
+
+BOOL mfc_thread_practice_dlg::IsThreadStarted()
+{
+	return b_thread_started;
+}
+
+void mfc_thread_practice_dlg::SetThreadStatus(BOOL started)
+{
+	b_thread_started = started;
+}
+
 void mfc_thread_practice_dlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_EDIT_LOG, _edit_log);
 }
 
 BEGIN_MESSAGE_MAP(mfc_thread_practice_dlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDC_BUTTON_START, OnButtonStartClicked)
+	ON_BN_CLICKED(IDC_BUTTON_STOP, OnButtonStopClicked)
 END_MESSAGE_MAP()
 
 
@@ -86,3 +127,17 @@ HCURSOR mfc_thread_practice_dlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+void mfc_thread_practice_dlg::OnButtonStartClicked()
+{	
+	if (!IsThreadStarted())
+	{
+		_edit_log.SetWindowText(L"Start thread");
+		AfxBeginThread(SampleThreadProc, this);
+	}
+}
+
+void mfc_thread_practice_dlg::OnButtonStopClicked()
+{
+	SetThreadStatus(FALSE);
+	_edit_log.SetWindowText(L"Stop thread");
+}
