@@ -129,9 +129,9 @@ void mfc_thread_practice_dlg::OnButtonStopClicked()
 {
 	if (_log_thread)
 	{
-		_log_thread->SuspendThread();
-		_log_thread->ExitInstance();
-		_log_thread->Delete();
+		TerminateThread(_log_thread->m_hThread, 0);
+		CloseHandle(_log_thread->m_hThread);
+		_log_thread->m_hThread = NULL;
 		_log_thread = NULL;
 		_edit_log.SetWindowText(L"Stop thread");
 	}
