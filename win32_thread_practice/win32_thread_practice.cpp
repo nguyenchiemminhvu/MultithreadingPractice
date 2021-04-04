@@ -5,7 +5,7 @@
 
 int main()
 {
-	std::cout << "hello win32 thread practice" << std::endl;
+	SampleWin32Threads::RunSampleWorker();
 
 	return 0;
 }
