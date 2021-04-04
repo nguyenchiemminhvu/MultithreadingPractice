@@ -22,7 +22,7 @@ UINT SampleThreadProc(LPVOID arg)
 	while (true)
 	{
 		CString _log;
-		_log.Format(_T("\r\n%s"), L"Hello, I am another thread");
+		_log.Format(_T("\r\nThread %d is running"), GetCurrentThreadId());
 
 		int _log_length = _dlg->GetEditLog()->GetWindowTextLength();
 		_dlg->GetEditLog()->SetSel(_log_length, _log_length);
@@ -30,7 +30,7 @@ UINT SampleThreadProc(LPVOID arg)
 
 		Sleep(1000);
 	}
-
+	
 	return 0;
 }
 
