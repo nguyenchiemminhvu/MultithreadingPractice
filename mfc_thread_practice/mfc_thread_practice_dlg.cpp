@@ -23,7 +23,6 @@ UINT SampleThreadProc(LPVOID arg)
 	{
 		CString _log;
 		_log.Format(_T("\r\nThread %d is running"), GetCurrentThreadId());
-
 		int _log_length = _dlg->GetEditLog()->GetWindowTextLength();
 		_dlg->GetEditLog()->SetSel(_log_length, _log_length);
 		_dlg->GetEditLog()->ReplaceSel(_log);
