@@ -1,5 +1,6 @@
 #include <QCoreApplication>
-#include <QDebug>
+
+#include "shared.hpp"
 
 int main(int argc, char *argv[])
 {
