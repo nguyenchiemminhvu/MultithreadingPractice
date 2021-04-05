@@ -87,17 +87,21 @@ namespace WorkingSynchronously
 
     void MyCounter::Increase()
     {
-        for (int i = 0; i < 1000; i++)
+        for (int i = 0; i < 10000; i++)
         {
+            m_locker.lock();
             m_count++;
+            m_locker.unlock();
         }
     }
 
     void MyCounter::Decrease()
     {
-        for (int i = 0; i < 1000; i++)
+        for (int i = 0; i < 10000; i++)
         {
+            m_locker.lock();
             m_count--;
+            m_locker.unlock();
         }
     }
 
@@ -114,7 +118,16 @@ namespace WorkingSynchronously
 
     void SampleWorker::run()
     {
+        switch (m_type)
+        {
+        case Type::INCREMENT:
+            m_counter->Increase();
+            break;
 
+        case Type::DECREMENT:
+            m_counter->Decrease();
+            break;
+        }
     }
 
     void RunExample()
