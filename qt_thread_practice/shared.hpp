@@ -17,95 +17,75 @@ namespace SampleThreads
 {
     class SampleWorker : public QThread
     {
+        Q_OBJECT
+
     public:
-        SampleWorker()
-        {
+        SampleWorker();
+        ~SampleWorker();
 
-        }
+    signals:
 
-        ~SampleWorker()
-        {
+    public slots:
 
-        }
+    public:
 
-        virtual void run() override
-        {
-            for (int i = 0; i < 10; i++)
-            {
-                qDebug() << "#" << (int)this->currentThreadId() << ": " << i;
-            }
-        }
+        virtual void run() override;
 
-        static void do_small_task()
-        {
-            for (int i = 0; i < 10; i++)
-            {
-                qDebug() << "#" << (int)QThread::currentThreadId() << ": " << i;
-            }
-        }
+        static void do_small_task();
 
-        static QString query_name_from_DB(const QByteArray& username, const QByteArray& password)
-        {
-            Q_UNUSED(username);
-            Q_UNUSED(password);
-
-            return "404 Not Found";
-        }
+        static QString query_name_from_DB(const QByteArray& username, const QByteArray& password);
     };
 
-    void CreateSampleThreads()
-    {
-        qDebug() << "#" << (int)QThread::currentThreadId();
-
-        SampleWorker worker;
-        worker.start();
-
-        QFuture<void> f_small_work = QtConcurrent::run(&SampleWorker::do_small_task);
-
-        QByteArray username = QString("vu").toUtf8();
-        QByteArray password = QString("123").toUtf8();
-        QFuture<QString> f_name_db = QtConcurrent::run(&SampleWorker::query_name_from_DB, username, password);
-        QString s_name_db = f_name_db.result();
-        qDebug() << "Query name from DB: " << s_name_db;
-
-        auto f_lambda = [=]() -> bool { return s_name_db.contains("404"); };
-        QFuture<bool> f_stupid_work = QtConcurrent::run(f_lambda);
-        bool f_check = f_stupid_work.result();
-        if (f_check)
-        {
-            qDebug() << "It's really stupid thread";
-        }
-
-        worker.wait();
-        f_small_work.waitForFinished();
-    }
+    void CreateSampleThreads();
 }
 
 namespace WorkingSynchronously
 {
-    class SampleWorker : public QThread
+    class MyCounter
     {
     public:
-        SampleWorker()
-        {
+        MyCounter();
+        ~MyCounter();
 
-        }
+        int GetCount();
 
-        ~SampleWorker()
-        {
+        void Increase();
 
-        }
+        void Decrease();
 
-        virtual void run() override
-        {
-
-        }
+    private:
+        QMutex m_locker;
+        int m_count;
     };
 
-    void RunExample()
+    class SampleWorker : public QThread
     {
+        Q_OBJECT
+    public:
+        enum Type
+        {
+            INCREMENT,
+            DECREMENT
+        };
 
-    }
+    public:
+        SampleWorker(MyCounter * c, Type t = INCREMENT);
+        ~SampleWorker();
+
+    signals:
+
+    public slots:
+
+    public:
+
+        virtual void run() override;
+
+    private:
+        Type m_type;
+        MyCounter * m_counter;
+    };
+
+    void RunExample();
 }
 
 
