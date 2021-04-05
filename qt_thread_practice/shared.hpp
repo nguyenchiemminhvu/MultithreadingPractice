@@ -67,6 +67,14 @@ namespace SampleThreads
         QString s_name_db = f_name_db.result();
         qDebug() << "Query name from DB: " << s_name_db;
 
+        auto f_lambda = [=]() -> bool { return s_name_db.contains("404"); };
+        QFuture<bool> f_stupid_work = QtConcurrent::run(f_lambda);
+        bool f_check = f_stupid_work.result();
+        if (f_check)
+        {
+            qDebug() << "It's really stupid thread";
+        }
+
         worker.wait();
         f_small_work.waitForFinished();
     }
