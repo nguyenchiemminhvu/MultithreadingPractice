@@ -32,7 +32,6 @@ namespace SampleThreads
             for (int i = 0; i < 10; i++)
             {
                 qDebug() << "#" << (int)this->currentThreadId() << ": " << i;
-                QThread::msleep(1000);
             }
         }
 
@@ -44,12 +43,10 @@ namespace SampleThreads
             }
         }
 
-        static QString query_name_from_DB(QString username, QString password)
+        static QString query_name_from_DB(const QByteArray& username, const QByteArray& password)
         {
             Q_UNUSED(username);
             Q_UNUSED(password);
-
-            QThread::msleep(1000);
 
             return "404 Not Found";
         }
@@ -59,15 +56,19 @@ namespace SampleThreads
     {
         qDebug() << "#" << (int)QThread::currentThreadId();
 
-        QtConcurrent::run(&SampleWorker::do_small_task).waitForFinished();
-
-        QFuture<QString> f_name_db = QtConcurrent::run(&SampleWorker::query_name_from_DB, "vu", "123");
-        QString str_name_db = f_name_db.result();
-        qDebug() << "Query name from DB: " << str_name_db;
-
         SampleWorker worker;
         worker.start();
+
+        QFuture<void> f_small_work = QtConcurrent::run(&SampleWorker::do_small_task);
+
+        QByteArray username = QString("vu").toUtf8();
+        QByteArray password = QString("123").toUtf8();
+        QFuture<QString> f_name_db = QtConcurrent::run(&SampleWorker::query_name_from_DB, username, password);
+        QString s_name_db = f_name_db.result();
+        qDebug() << "Query name from DB: " << s_name_db;
+
         worker.wait();
+        f_small_work.waitForFinished();
     }
 }
 
