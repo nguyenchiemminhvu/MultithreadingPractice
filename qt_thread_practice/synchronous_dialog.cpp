@@ -40,7 +40,19 @@ void Synchronous_Dialog::InitializeTimer()
 
 void Synchronous_Dialog::InitializeThreads()
 {
+    for (int i = 0; i < NUMBER_OF_THREADS; i++)
+    {
+        m_threads[i] = new QThread();
+        m_conditions[i] = new QWaitCondition();
+    }
 
+    for (int i = 0; i < NUMBER_OF_THREADS; i++)
+    {
+        SynchronousWorker * worker = new SynchronousWorker(&m_total_income, 10);
+        worker->moveToThread(m_threads[i]);
+        connect(m_threads[i], SIGNAL(started()), worker, SLOT(Process()));
+        connect(m_threads[i], SIGNAL(finished()), m_threads[i], SLOT(deleteLater()));
+    }
 }
 
 void Synchronous_Dialog::Uninitialize()
@@ -48,5 +60,24 @@ void Synchronous_Dialog::Uninitialize()
     if (m_timer)
     {
         delete m_timer;
+    }
+}
+
+SynchronousWorker::SynchronousWorker(double *income, int round)
+    : p_income(income), m_round(round)
+{
+
+}
+
+SynchronousWorker::~SynchronousWorker()
+{
+
+}
+
+void SynchronousWorker::Process()
+{
+    for (int i = 0; i < m_round; i++)
+    {
+        *p_income++;
     }
 }

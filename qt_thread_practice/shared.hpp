@@ -13,6 +13,8 @@
 #include <QFuture>
 #include <QtConcurrent/qtconcurrentrun.h>
 
+#define NUMBER_OF_THREADS (4)
+
 namespace SampleThreads
 {
     class SampleWorker : public QThread
