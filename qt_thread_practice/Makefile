@@ -225,6 +225,8 @@ Makefile: qt_thread_practice.pro ../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/wi
 		../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/qt.prf \
 		../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/resources.prf \
 		../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/moc.prf \
+		../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/win32/opengl.prf \
+		../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/uic.prf \
 		../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/qmake_use.prf \
 		../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/file_copies.prf \
 		../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/testcase_targets.prf \
@@ -232,6 +234,8 @@ Makefile: qt_thread_practice.pro ../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/wi
 		../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/yacc.prf \
 		../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/lex.prf \
 		qt_thread_practice.pro \
+		../../../Qt/Qt5.9.9/5.9.9/mingw53_32/lib/Qt5Widgets.prl \
+		../../../Qt/Qt5.9.9/5.9.9/mingw53_32/lib/Qt5Gui.prl \
 		../../../Qt/Qt5.9.9/5.9.9/mingw53_32/lib/Qt5Core.prl
 	$(QMAKE) -o Makefile qt_thread_practice.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug"
 ../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/spec_pre.prf:
@@ -398,6 +402,8 @@ Makefile: qt_thread_practice.pro ../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/wi
 ../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/qt.prf:
 ../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/resources.prf:
 ../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/moc.prf:
+../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/win32/opengl.prf:
+../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/uic.prf:
 ../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/qmake_use.prf:
 ../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/file_copies.prf:
 ../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/testcase_targets.prf:
@@ -405,6 +411,8 @@ Makefile: qt_thread_practice.pro ../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/wi
 ../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/yacc.prf:
 ../../../Qt/Qt5.9.9/5.9.9/mingw53_32/mkspecs/features/lex.prf:
 qt_thread_practice.pro:
+../../../Qt/Qt5.9.9/5.9.9/mingw53_32/lib/Qt5Widgets.prl:
+../../../Qt/Qt5.9.9/5.9.9/mingw53_32/lib/Qt5Gui.prl:
 ../../../Qt/Qt5.9.9/5.9.9/mingw53_32/lib/Qt5Core.prl:
 qmake: FORCE
 	@$(QMAKE) -o Makefile qt_thread_practice.pro -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug"

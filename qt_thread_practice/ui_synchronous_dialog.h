@@ -26,10 +26,9 @@ QT_BEGIN_NAMESPACE
 class Ui_Synchronous_Dialog
 {
 public:
-    QWidget *widget;
+    QWidget *layoutWidget;
     QHBoxLayout *horizontalLayout_2;
     QLCDNumber *tick_count;
-    QSpacerItem *horizontalSpacer;
     QSpacerItem *horizontalSpacer_2;
     QHBoxLayout *horizontalLayout;
     QPushButton *button_start;
@@ -40,33 +39,31 @@ public:
         if (Synchronous_Dialog->objectName().isEmpty())
             Synchronous_Dialog->setObjectName(QStringLiteral("Synchronous_Dialog"));
         Synchronous_Dialog->resize(414, 228);
-        widget = new QWidget(Synchronous_Dialog);
-        widget->setObjectName(QStringLiteral("widget"));
-        widget->setGeometry(QRect(30, 190, 371, 26));
-        horizontalLayout_2 = new QHBoxLayout(widget);
+        layoutWidget = new QWidget(Synchronous_Dialog);
+        layoutWidget->setObjectName(QStringLiteral("layoutWidget"));
+        layoutWidget->setGeometry(QRect(30, 190, 371, 26));
+        horizontalLayout_2 = new QHBoxLayout(layoutWidget);
         horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
         horizontalLayout_2->setContentsMargins(0, 0, 0, 0);
-        tick_count = new QLCDNumber(widget);
+        tick_count = new QLCDNumber(layoutWidget);
         tick_count->setObjectName(QStringLiteral("tick_count"));
+        tick_count->setAutoFillBackground(false);
+        tick_count->setDigitCount(9);
 
         horizontalLayout_2->addWidget(tick_count);
 
-        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-        horizontalLayout_2->addItem(horizontalSpacer);
-
-        horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+        horizontalSpacer_2 = new QSpacerItem(60, 20, QSizePolicy::Fixed, QSizePolicy::Minimum);
 
         horizontalLayout_2->addItem(horizontalSpacer_2);
 
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        button_start = new QPushButton(widget);
+        button_start = new QPushButton(layoutWidget);
         button_start->setObjectName(QStringLiteral("button_start"));
 
         horizontalLayout->addWidget(button_start);
 
-        button_stop = new QPushButton(widget);
+        button_stop = new QPushButton(layoutWidget);
         button_stop->setObjectName(QStringLiteral("button_stop"));
 
         horizontalLayout->addWidget(button_stop);

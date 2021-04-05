@@ -9,7 +9,7 @@
 #include <QString>
 #include <QVector>
 #include <QQueue>
-
+#include <QTimer>
 #include <QThread>
 #include <QMutex>
 #include <QFuture>
@@ -27,6 +27,21 @@ class Synchronous_Dialog : public QDialog
 public:
     explicit Synchronous_Dialog(QWidget *parent = nullptr);
     ~Synchronous_Dialog();
+
+signals:
+
+public slots:
+    void OnTimerTicked();
+
+private:
+    void Initialize();
+    void InitializeTimer();
+    void InitializeThreads();
+    void Uninitialize();
+
+private:
+    QTimer * m_timer;
+    double m_total_income;
 
 private:
     Ui::Synchronous_Dialog *ui;
