@@ -10,7 +10,7 @@ namespace SampleThreads
 
     SampleWorker::~SampleWorker()
     {
-
+        this->deleteLater();
     }
 
     void SampleWorker::run()
@@ -113,7 +113,7 @@ namespace WorkingSynchronously
 
     SampleWorker::~SampleWorker()
     {
-
+        this->deleteLater();
     }
 
     void SampleWorker::run()
