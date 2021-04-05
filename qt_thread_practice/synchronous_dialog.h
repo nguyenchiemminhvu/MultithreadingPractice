@@ -5,6 +5,16 @@
 
 #include <QDialog>
 
+#include <QDebug>
+#include <QString>
+#include <QVector>
+#include <QQueue>
+
+#include <QThread>
+#include <QMutex>
+#include <QFuture>
+#include <QtConcurrent/qtconcurrentrun.h>
+
 namespace Ui
 {
     class Synchronous_Dialog;
