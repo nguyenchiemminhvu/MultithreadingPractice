@@ -16,7 +16,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        shared.cpp
+        shared.cpp \
+        synchronous_dialog.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -24,4 +25,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    shared.hpp
+    shared.hpp \
+    synchronous_dialog.h
+
+FORMS += \
+    synchronous_dialog.ui
+
+QT += widgets

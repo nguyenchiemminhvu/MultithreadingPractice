@@ -1,13 +1,18 @@
-#include <QCoreApplication>
+#include <QApplication>
 
 #include "shared.hpp"
+#include "synchronous_dialog.h"
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QApplication app(argc, argv);
 
     //SampleThreads::CreateSampleThreads();
-    WorkingSynchronously::RunExample();
+    //WorkingSynchronously::RunExample();
 
-    return a.exec();
+    Synchronous_Dialog * dialog;
+    dialog = new Synchronous_Dialog();
+    dialog->show();
+
+    return app.exec();
 }
