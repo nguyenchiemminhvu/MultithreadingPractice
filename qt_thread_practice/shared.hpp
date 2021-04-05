@@ -9,6 +9,7 @@
 #include <QQueue>
 
 #include <QThread>
+#include <QMutex>
 #include <QFuture>
 #include <QtConcurrent/qtconcurrentrun.h>
 
@@ -77,6 +78,33 @@ namespace SampleThreads
 
         worker.wait();
         f_small_work.waitForFinished();
+    }
+}
+
+namespace WorkingSynchronously
+{
+    class SampleWorker : public QThread
+    {
+    public:
+        SampleWorker()
+        {
+
+        }
+
+        ~SampleWorker()
+        {
+
+        }
+
+        virtual void run() override
+        {
+
+        }
+    };
+
+    void RunExample()
+    {
+
     }
 }
 

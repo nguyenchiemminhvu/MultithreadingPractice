@@ -6,7 +6,8 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    SampleThreads::CreateSampleThreads();
+    //SampleThreads::CreateSampleThreads();
+    WorkingSynchronously::RunExample();
 
     return a.exec();
 }
