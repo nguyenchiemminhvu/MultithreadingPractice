@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    qDebug() << "Hello qt multithreading";
+    SampleThreads::CreateSampleThreads();
 
     return a.exec();
 }
