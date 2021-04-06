@@ -179,7 +179,7 @@ void Synchronous_Dialog::InitializeThreads()
     {
         int cur = i;
         int next = (i + 1) % NUMBER_OF_THREADS;
-        SynchronousWorker * worker = new SynchronousWorker(i, &m_total_income, &m_turn, 10, m_mutex, m_conditions[cur], m_conditions[next]);
+        SynchronousWorker * worker = new SynchronousWorker(i, 10, &m_turn, &m_total_income, m_mutex, m_conditions[cur], m_conditions[next]);
         worker->moveToThread(m_threads[i]);
         connect(m_threads[i], SIGNAL(started()), worker, SLOT(Process()));
         connect(worker, SIGNAL(UpdateProgress(int,int)), this, SLOT(OnProgressUpdated(int,int)));
@@ -213,14 +213,14 @@ void Synchronous_Dialog::Uninitialize()
 ///////////////////////////////////////////////////////////////////////////////////////
 /// \brief SynchronousWorker::SynchronousWorker
 /// \param id
-/// \param income
-/// \param turn
 /// \param round
+/// \param turn
+/// \param income
 /// \param locker
 /// \param curCond
 /// \param nextCond
 ///
-SynchronousWorker::SynchronousWorker(int id, double *income, int *turn, int round, QMutex *locker, QWaitCondition *curCond, QWaitCondition *nextCond)
+SynchronousWorker::SynchronousWorker(int id, int round, int *turn, double *income, QMutex *locker, QWaitCondition *curCond, QWaitCondition *nextCond)
     : m_id(id),
       m_round(round)
 {
@@ -231,9 +231,6 @@ SynchronousWorker::SynchronousWorker(int id, double *income, int *turn, int roun
     p_nextCond = nextCond;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////
-/// \brief SynchronousWorker::~SynchronousWorker
-///
 SynchronousWorker::~SynchronousWorker()
 {
 

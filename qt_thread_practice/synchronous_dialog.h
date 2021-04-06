@@ -32,7 +32,7 @@ class SynchronousWorker : public QObject
     Q_OBJECT
 
 public:
-    SynchronousWorker(int id, double * income, int * turn, int round, QMutex * locker, QWaitCondition * curCond, QWaitCondition * nextCond);
+    SynchronousWorker(int id, int round, int * turn, double * income, QMutex * locker, QWaitCondition * curCond, QWaitCondition * nextCond);
     ~SynchronousWorker();
 
     int RandomValue(int from, int to);
