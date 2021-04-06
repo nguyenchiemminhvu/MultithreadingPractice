@@ -61,6 +61,7 @@ signals:
 public slots:
     void OnTimerTicked();
     void OnButtonStartClicked();
+    void ResetThreads();
 
 private:
     void Initialize();

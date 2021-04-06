@@ -28,11 +28,20 @@ void Synchronous_Dialog::OnTimerTicked()
 void Synchronous_Dialog::OnButtonStartClicked()
 {
     m_total_income = 0;
+    ui->button_start->setEnabled(false);
 
     for (int i = 0; i < NUMBER_OF_THREADS; i++)
     {
         m_threads[i]->start();
     }
+}
+
+void Synchronous_Dialog::ResetThreads()
+{
+    m_threads.clear();
+    InitializeThreads();
+
+    ui->button_start->setEnabled(true);
 }
 
 void Synchronous_Dialog::Initialize()
@@ -63,6 +72,7 @@ void Synchronous_Dialog::InitializeThreads()
         SynchronousWorker * worker = new SynchronousWorker(i, &m_total_income, &m_turn, 10);
         worker->moveToThread(m_threads[i]);
         connect(m_threads[i], SIGNAL(started()), worker, SLOT(Process()));
+        connect(worker, SIGNAL(Finished()), this, SLOT(ResetThreads()));
         connect(worker, SIGNAL(Finished()), m_threads[i], SLOT(quit()));
         connect(worker, SIGNAL(Finished()), worker, SLOT(deleteLater()));
         connect(m_threads[i], SIGNAL(finished()), m_threads[i], SLOT(deleteLater()));

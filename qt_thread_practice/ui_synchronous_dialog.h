@@ -31,8 +31,8 @@ public:
     QLCDNumber *tick_count;
     QSpacerItem *horizontalSpacer_2;
     QHBoxLayout *horizontalLayout;
+    QSpacerItem *horizontalSpacer;
     QPushButton *button_start;
-    QPushButton *button_stop;
 
     void setupUi(QDialog *Synchronous_Dialog)
     {
@@ -52,21 +52,20 @@ public:
 
         horizontalLayout_2->addWidget(tick_count);
 
-        horizontalSpacer_2 = new QSpacerItem(60, 20, QSizePolicy::Fixed, QSizePolicy::Minimum);
+        horizontalSpacer_2 = new QSpacerItem(80, 20, QSizePolicy::Fixed, QSizePolicy::Minimum);
 
         horizontalLayout_2->addItem(horizontalSpacer_2);
 
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
+        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        horizontalLayout->addItem(horizontalSpacer);
+
         button_start = new QPushButton(layoutWidget);
         button_start->setObjectName(QStringLiteral("button_start"));
 
         horizontalLayout->addWidget(button_start);
-
-        button_stop = new QPushButton(layoutWidget);
-        button_stop->setObjectName(QStringLiteral("button_stop"));
-
-        horizontalLayout->addWidget(button_stop);
 
 
         horizontalLayout_2->addLayout(horizontalLayout);
@@ -81,7 +80,6 @@ public:
     {
         Synchronous_Dialog->setWindowTitle(QApplication::translate("Synchronous_Dialog", "Dialog", Q_NULLPTR));
         button_start->setText(QApplication::translate("Synchronous_Dialog", "Start", Q_NULLPTR));
-        button_stop->setText(QApplication::translate("Synchronous_Dialog", "Stop", Q_NULLPTR));
     } // retranslateUi
 
 };
