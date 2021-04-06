@@ -1,6 +1,10 @@
 #include "synchronous_dialog.h"
 #include "ui_synchronous_dialog.h"
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief Synchronous_Dialog::Synchronous_Dialog
+/// \param parent
+///
 Synchronous_Dialog::Synchronous_Dialog(QWidget *parent) :
     QDialog(parent),
     m_total_income(0),
@@ -12,6 +16,9 @@ Synchronous_Dialog::Synchronous_Dialog(QWidget *parent) :
     Initialize();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief Synchronous_Dialog::~Synchronous_Dialog
+///
 Synchronous_Dialog::~Synchronous_Dialog()
 {
     Uninitialize();
@@ -20,11 +27,17 @@ Synchronous_Dialog::~Synchronous_Dialog()
     this->deleteLater();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief Synchronous_Dialog::OnTimerTicked
+///
 void Synchronous_Dialog::OnTimerTicked()
 {
     ui->tick_count->display(m_total_income);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief Synchronous_Dialog::OnButtonStartClicked
+///
 void Synchronous_Dialog::OnButtonStartClicked()
 {
     m_total_income = 0;
@@ -36,6 +49,9 @@ void Synchronous_Dialog::OnButtonStartClicked()
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief Synchronous_Dialog::ResetThreads
+///
 void Synchronous_Dialog::ResetThreads()
 {
     m_threads.clear();
@@ -44,6 +60,9 @@ void Synchronous_Dialog::ResetThreads()
     ui->button_start->setEnabled(true);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief Synchronous_Dialog::Initialize
+///
 void Synchronous_Dialog::Initialize()
 {
     InitializeTimer();
@@ -51,6 +70,9 @@ void Synchronous_Dialog::Initialize()
     InitializeButtons();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief Synchronous_Dialog::InitializeTimer
+///
 void Synchronous_Dialog::InitializeTimer()
 {
     m_timer = new QTimer();
@@ -59,6 +81,9 @@ void Synchronous_Dialog::InitializeTimer()
     m_timer->start(100);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief Synchronous_Dialog::InitializeThreads
+///
 void Synchronous_Dialog::InitializeThreads()
 {
     for (int i = 0; i < NUMBER_OF_THREADS; i++)
@@ -79,11 +104,17 @@ void Synchronous_Dialog::InitializeThreads()
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief Synchronous_Dialog::InitializeButtons
+///
 void Synchronous_Dialog::InitializeButtons()
 {
     connect(ui->button_start, SIGNAL(clicked()), this, SLOT(OnButtonStartClicked()));
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief Synchronous_Dialog::Uninitialize
+///
 void Synchronous_Dialog::Uninitialize()
 {
     if (m_timer)
@@ -92,6 +123,13 @@ void Synchronous_Dialog::Uninitialize()
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief SynchronousWorker::SynchronousWorker
+/// \param id
+/// \param income
+/// \param turn
+/// \param round
+///
 SynchronousWorker::SynchronousWorker(int id, double * income, int * turn, int round)
     : m_id(id),
       m_round(round)
@@ -100,16 +138,28 @@ SynchronousWorker::SynchronousWorker(int id, double * income, int * turn, int ro
     p_turn = turn;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief SynchronousWorker::~SynchronousWorker
+///
 SynchronousWorker::~SynchronousWorker()
 {
 
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief SynchronousWorker::RandomValue
+/// \param from
+/// \param to
+/// \return
+///
 int SynchronousWorker::RandomValue(int from, int to)
 {
     return qrand() % ((to + 1) - from) + from;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief SynchronousWorker::Process
+///
 void SynchronousWorker::Process()
 {
     if (p_income)
