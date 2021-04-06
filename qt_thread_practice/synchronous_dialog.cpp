@@ -4,6 +4,7 @@
 Synchronous_Dialog::Synchronous_Dialog(QWidget *parent) :
     QDialog(parent),
     m_total_income(0),
+    m_turn(0),
     ui(new Ui::Synchronous_Dialog)
 {
     ui->setupUi(this);
@@ -24,10 +25,21 @@ void Synchronous_Dialog::OnTimerTicked()
     ui->tick_count->display(m_total_income);
 }
 
+void Synchronous_Dialog::OnButtonStartClicked()
+{
+    m_total_income = 0;
+
+    for (int i = 0; i < NUMBER_OF_THREADS; i++)
+    {
+        m_threads[i]->start();
+    }
+}
+
 void Synchronous_Dialog::Initialize()
 {
     InitializeTimer();
     InitializeThreads();
+    InitializeButtons();
 }
 
 void Synchronous_Dialog::InitializeTimer()
@@ -42,17 +54,24 @@ void Synchronous_Dialog::InitializeThreads()
 {
     for (int i = 0; i < NUMBER_OF_THREADS; i++)
     {
-        m_threads[i] = new QThread();
-        m_conditions[i] = new QWaitCondition();
+        QThread * pThread = new QThread();
+        m_threads.push_back(pThread);
     }
 
     for (int i = 0; i < NUMBER_OF_THREADS; i++)
     {
-        SynchronousWorker * worker = new SynchronousWorker(&m_total_income, 10);
+        SynchronousWorker * worker = new SynchronousWorker(i, &m_total_income, &m_turn, 10);
         worker->moveToThread(m_threads[i]);
         connect(m_threads[i], SIGNAL(started()), worker, SLOT(Process()));
+        connect(worker, SIGNAL(Finished()), m_threads[i], SLOT(quit()));
+        connect(worker, SIGNAL(Finished()), worker, SLOT(deleteLater()));
         connect(m_threads[i], SIGNAL(finished()), m_threads[i], SLOT(deleteLater()));
     }
+}
+
+void Synchronous_Dialog::InitializeButtons()
+{
+    connect(ui->button_start, SIGNAL(clicked()), this, SLOT(OnButtonStartClicked()));
 }
 
 void Synchronous_Dialog::Uninitialize()
@@ -63,10 +82,12 @@ void Synchronous_Dialog::Uninitialize()
     }
 }
 
-SynchronousWorker::SynchronousWorker(double *income, int round)
-    : p_income(income), m_round(round)
+SynchronousWorker::SynchronousWorker(int id, double * income, int * turn, int round)
+    : m_id(id),
+      m_round(round)
 {
-
+    p_income = income;
+    p_turn = turn;
 }
 
 SynchronousWorker::~SynchronousWorker()
@@ -74,10 +95,26 @@ SynchronousWorker::~SynchronousWorker()
 
 }
 
+int SynchronousWorker::RandomValue(int from, int to)
+{
+    return qrand() % ((to + 1) - from) + from;
+}
+
 void SynchronousWorker::Process()
 {
-    for (int i = 0; i < m_round; i++)
+    if (p_income)
     {
-        *p_income++;
+        QTime time = QTime::currentTime();
+        qsrand((uint)time.msec());
+        for (int i = 0; i < m_round; i++)
+        {
+            int sign = RandomValue(0, 1);
+            int cash = RandomValue(1, 10);
+            *p_income += sign ? -cash : cash;
+
+            QThread::currentThread()->msleep(500);
+        }
     }
+
+    emit Finished();
 }
