@@ -219,6 +219,7 @@ void SynchronousWorker::Process()
         {
             p_locker->lock();
             (*p_income)++;
+            (*p_turn) = ((*p_turn) + 1) % NUMBER_OF_THREADS;
             p_locker->unlock();
 
             /*
@@ -229,7 +230,7 @@ void SynchronousWorker::Process()
             p_locker->unlock();
             */
 
-            qDebug() << m_id << " " << i << " " << *p_income;
+            qDebug() << m_id << " " << i << " " << *p_turn << " " << *p_income;
         }
     }
 
