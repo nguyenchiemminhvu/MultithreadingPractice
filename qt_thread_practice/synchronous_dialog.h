@@ -31,7 +31,7 @@ class SynchronousWorker : public QObject
     Q_OBJECT
 
 public:
-    SynchronousWorker(int id, double * income, int * turn, int round);
+    SynchronousWorker(int id, QMutex * locker, double * income, int * turn, int round);
     ~SynchronousWorker();
 
     int RandomValue(int from, int to);
@@ -44,9 +44,10 @@ public slots:
 
 private:
     int m_id;
+    int m_round;
     double * p_income;
     int * p_turn;
-    int m_round;
+    QMutex * p_locker;
 
     QWaitCondition m_condition;
 };
@@ -79,6 +80,8 @@ private:
 private:
     double m_total_income;
     int m_turn;
+
+    QMutex * m_locker;
     QTimer * m_timer;
     QVector<QThread*> m_threads;
 
