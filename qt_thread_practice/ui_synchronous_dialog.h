@@ -17,8 +17,10 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLCDNumber>
+#include <QtWidgets/QProgressBar>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSpacerItem>
+#include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -33,6 +35,12 @@ public:
     QHBoxLayout *horizontalLayout;
     QSpacerItem *horizontalSpacer;
     QPushButton *button_start;
+    QWidget *widget;
+    QVBoxLayout *verticalLayout;
+    QProgressBar *progress_1;
+    QProgressBar *progress_2;
+    QProgressBar *progress_3;
+    QProgressBar *progress_4;
 
     void setupUi(QDialog *Synchronous_Dialog)
     {
@@ -69,6 +77,36 @@ public:
 
 
         horizontalLayout_2->addLayout(horizontalLayout);
+
+        widget = new QWidget(Synchronous_Dialog);
+        widget->setObjectName(QStringLiteral("widget"));
+        widget->setGeometry(QRect(30, 10, 371, 161));
+        verticalLayout = new QVBoxLayout(widget);
+        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+        verticalLayout->setContentsMargins(0, 0, 0, 0);
+        progress_1 = new QProgressBar(widget);
+        progress_1->setObjectName(QStringLiteral("progress_1"));
+        progress_1->setValue(0);
+
+        verticalLayout->addWidget(progress_1);
+
+        progress_2 = new QProgressBar(widget);
+        progress_2->setObjectName(QStringLiteral("progress_2"));
+        progress_2->setValue(0);
+
+        verticalLayout->addWidget(progress_2);
+
+        progress_3 = new QProgressBar(widget);
+        progress_3->setObjectName(QStringLiteral("progress_3"));
+        progress_3->setValue(0);
+
+        verticalLayout->addWidget(progress_3);
+
+        progress_4 = new QProgressBar(widget);
+        progress_4->setObjectName(QStringLiteral("progress_4"));
+        progress_4->setValue(0);
+
+        verticalLayout->addWidget(progress_4);
 
 
         retranslateUi(Synchronous_Dialog);

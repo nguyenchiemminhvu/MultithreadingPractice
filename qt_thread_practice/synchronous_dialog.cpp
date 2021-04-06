@@ -38,6 +38,16 @@ void Synchronous_Dialog::OnTimerTicked()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
+/// \brief Synchronous_Dialog::OnProgressUpdated
+/// \param id
+/// \param percent
+///
+void Synchronous_Dialog::OnProgressUpdated(int id, int percent)
+{
+    m_progress_bars[id]->setValue(percent);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
 /// \brief Synchronous_Dialog::OnButtonStartClicked
 ///
 void Synchronous_Dialog::OnButtonStartClicked()
@@ -99,6 +109,7 @@ void Synchronous_Dialog::ResetThreads()
 void Synchronous_Dialog::Initialize()
 {
     InitializeTimer();
+    InitProgressBars();
     InitializeThreads();
     InitializeButtons();
 }
@@ -117,6 +128,17 @@ void Synchronous_Dialog::InitializeTimer()
     connect(m_timer, SIGNAL(timeout()), this, SLOT(OnTimerTicked()));
     connect(m_timer, SIGNAL(timeout()), m_timer, SLOT(start()));
     m_timer->start(100);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief Synchronous_Dialog::InitProgressBars
+///
+void Synchronous_Dialog::InitProgressBars()
+{
+    m_progress_bars.push_back(ui->progress_1);
+    m_progress_bars.push_back(ui->progress_2);
+    m_progress_bars.push_back(ui->progress_3);
+    m_progress_bars.push_back(ui->progress_4);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -149,6 +171,7 @@ void Synchronous_Dialog::InitializeThreads()
         SynchronousWorker * worker = new SynchronousWorker(i, &m_total_income, &m_turn, 10, m_mutex, m_conditions[cur], m_conditions[next]);
         worker->moveToThread(m_threads[i]);
         connect(m_threads[i], SIGNAL(started()), worker, SLOT(Process()));
+        connect(worker, SIGNAL(UpdateProgress(int,int)), this, SLOT(OnProgressUpdated(int,int)));
         connect(worker, SIGNAL(Finished(int)), this, SLOT(OnThreadFinished(int)));
         connect(worker, SIGNAL(Finished()), m_threads[i], SLOT(quit()));
         connect(worker, SIGNAL(Finished()), worker, SLOT(deleteLater()));
@@ -171,6 +194,7 @@ void Synchronous_Dialog::Uninitialize()
 {
     if (m_timer)
     {
+        m_timer->stop();
         m_timer->deleteLater();
     }
 }
@@ -196,6 +220,9 @@ SynchronousWorker::SynchronousWorker(int id, double *income, int *turn, int roun
     p_nextCond = nextCond;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief SynchronousWorker::~SynchronousWorker
+///
 SynchronousWorker::~SynchronousWorker()
 {
 
@@ -219,8 +246,6 @@ void SynchronousWorker::Process()
 {
     if (p_income)
     {
-        QTime time = QTime::currentTime();
-        qsrand((uint)time.msec());
         for (int i = 0; i < m_round; i++)
         {
             p_locker->lock();
@@ -229,10 +254,13 @@ void SynchronousWorker::Process()
                 p_curCond->wait(p_locker);
             }
 
+            QThread::currentThread()->msleep(200);
             (*p_income)++;
             (*p_turn) = ((*p_turn) + 1) % NUMBER_OF_THREADS;
 
-            qDebug() << m_id << " " << i << " " << *p_turn << " " << *p_income;
+            int percent = ((double)(i + 1) / m_round) * 100;
+            emit UpdateProgress(m_id, percent);
+            qDebug() << m_id << " " << i << " " << *p_turn << " " << *p_income << " " << percent;
 
             p_nextCond->notify_one();
             p_locker->unlock();

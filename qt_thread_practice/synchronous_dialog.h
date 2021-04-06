@@ -10,6 +10,7 @@
 #include <QQueue>
 #include <QTime>
 #include <QTimer>
+#include <QProgressBar>
 #include <QThread>
 #include <QMutex>
 #include <QFuture>
@@ -37,6 +38,7 @@ public:
     int RandomValue(int from, int to);
 
 signals:
+    void UpdateProgress(int, int);
     void Finished();
     void Finished(int);
 
@@ -69,6 +71,7 @@ signals:
 
 public slots:
     void OnTimerTicked();
+    void OnProgressUpdated(int id, int percent);
     void OnButtonStartClicked();
     void OnThreadFinished(int id);
     void ResetThreads();
@@ -76,6 +79,7 @@ public slots:
 private:
     void Initialize();
     void InitializeTimer();
+    void InitProgressBars();
     void InitializeThreads();
     void InitializeButtons();
     void Uninitialize();
@@ -88,6 +92,7 @@ private:
     QVector<bool> m_threads_stats;
     QVector<QThread*> m_threads;
     QVector<QWaitCondition*> m_conditions;
+    QVector<QProgressBar*> m_progress_bars;
 
 private:
     Ui::Synchronous_Dialog *ui;
