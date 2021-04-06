@@ -31,25 +31,25 @@ class SynchronousWorker : public QObject
     Q_OBJECT
 
 public:
-    SynchronousWorker(int id, QMutex * locker, double * income, int * turn, int round);
+    SynchronousWorker(int id, double * income, int * turn, int round, QMutex * locker);
     ~SynchronousWorker();
 
     int RandomValue(int from, int to);
 
 signals:
     void Finished();
+    void Finished(int);
 
 public slots:
     void Process();
 
 private:
     int m_id;
-    int m_round;
     double * p_income;
     int * p_turn;
-    QMutex * p_locker;
+    int m_round;
 
-    QWaitCondition m_condition;
+    QMutex * p_locker;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -68,6 +68,7 @@ signals:
 public slots:
     void OnTimerTicked();
     void OnButtonStartClicked();
+    void OnThreadFinished(int id);
     void ResetThreads();
 
 private:
@@ -80,9 +81,9 @@ private:
 private:
     double m_total_income;
     int m_turn;
-
-    QMutex * m_locker;
     QTimer * m_timer;
+    QMutex * m_mutex;
+    QVector<bool> m_threads_stats;
     QVector<QThread*> m_threads;
 
 private:

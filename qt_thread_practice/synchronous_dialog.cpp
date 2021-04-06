@@ -9,6 +9,7 @@ Synchronous_Dialog::Synchronous_Dialog(QWidget *parent) :
     QDialog(parent),
     m_total_income(0),
     m_turn(0),
+    m_mutex(NULL),
     ui(new Ui::Synchronous_Dialog)
 {
     ui->setupUi(this);
@@ -50,11 +51,32 @@ void Synchronous_Dialog::OnButtonStartClicked()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
+/// \brief Synchronous_Dialog::OnThreadFinished
+/// \param id
+///
+void Synchronous_Dialog::OnThreadFinished(int id)
+{
+    m_threads_stats[id] = true;
+
+    bool all_done = true;
+    for (bool b : m_threads_stats)
+    {
+        all_done &= b;
+    }
+
+    if (all_done)
+    {
+        ResetThreads();
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
 /// \brief Synchronous_Dialog::ResetThreads
 ///
 void Synchronous_Dialog::ResetThreads()
 {
     m_threads.clear();
+    m_threads_stats.clear();
     InitializeThreads();
 
     ui->button_start->setEnabled(true);
@@ -86,24 +108,26 @@ void Synchronous_Dialog::InitializeTimer()
 ///
 void Synchronous_Dialog::InitializeThreads()
 {
-    if (m_locker)
+    if (m_mutex)
     {
-        delete m_locker;
+        delete m_mutex;
+        m_mutex = NULL;
     }
-    m_locker = new QMutex();
+    m_mutex = new QMutex();
 
     for (int i = 0; i < NUMBER_OF_THREADS; i++)
     {
         QThread * pThread = new QThread();
         m_threads.push_back(pThread);
+        m_threads_stats.push_back(false);
     }
 
     for (int i = 0; i < NUMBER_OF_THREADS; i++)
     {
-        SynchronousWorker * worker = new SynchronousWorker(i, m_locker, &m_total_income, &m_turn, 10);
+        SynchronousWorker * worker = new SynchronousWorker(i, &m_total_income, &m_turn, 10, m_mutex);
         worker->moveToThread(m_threads[i]);
         connect(m_threads[i], SIGNAL(started()), worker, SLOT(Process()));
-        connect(worker, SIGNAL(Finished()), this, SLOT(ResetThreads()));
+        connect(worker, SIGNAL(Finished(int)), this, SLOT(OnThreadFinished(int)));
         connect(worker, SIGNAL(Finished()), m_threads[i], SLOT(quit()));
         connect(worker, SIGNAL(Finished()), worker, SLOT(deleteLater()));
         connect(m_threads[i], SIGNAL(finished()), m_threads[i], SLOT(deleteLater()));
@@ -136,13 +160,13 @@ void Synchronous_Dialog::Uninitialize()
 /// \param turn
 /// \param round
 ///
-SynchronousWorker::SynchronousWorker(int id, QMutex * locker, double * income, int * turn, int round)
+SynchronousWorker::SynchronousWorker(int id, double * income, int * turn, int round, QMutex * locker)
     : m_id(id),
       m_round(round)
 {
-    p_locker = locker;
     p_income = income;
     p_turn = turn;
+    p_locker = locker;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -171,26 +195,24 @@ void SynchronousWorker::Process()
 {
     if (p_income)
     {
-        p_locker->lock();
-        while (*p_turn != m_id)
-        {
-            m_condition.wait(p_locker);
-        }
-
         QTime time = QTime::currentTime();
         qsrand((uint)time.msec());
-        for (int i = 0; i < m_round; i++)
+        for (int i = 0; i < m_round * 10000; i++)
         {
+            p_locker->lock();
+            (*p_income)++;
+            p_locker->unlock();
+
+            /*
             int sign = RandomValue(0, 1);
             int cash = RandomValue(1, 10);
-            *p_income += sign ? -cash : cash;
-
-            QThread::currentThread()->msleep(500);
-            *p_turn = (*p_turn + 1) % NUMBER_OF_THREADS;
-            m_condition.wakeOne();
+            p_locker->lock();
+            (*p_income) += sign ? -cash : cash;
+            p_locker->unlock();
+            */
         }
-        p_locker->unlock();
     }
 
     emit Finished();
+    emit Finished(m_id);
 }
