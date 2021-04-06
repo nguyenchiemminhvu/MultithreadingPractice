@@ -23,6 +23,9 @@ namespace Ui
     class Synchronous_Dialog;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief The SynchronousWorker class
+///
 class SynchronousWorker : public QObject
 {
     Q_OBJECT
@@ -48,6 +51,9 @@ private:
     QWaitCondition m_condition;
 };
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief The Synchronous_Dialog class
+///
 class Synchronous_Dialog : public QDialog
 {
     Q_OBJECT
