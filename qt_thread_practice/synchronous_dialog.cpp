@@ -10,6 +10,7 @@ Synchronous_Dialog::Synchronous_Dialog(QWidget *parent) :
     m_total_income(0),
     m_turn(0),
     m_mutex(NULL),
+    m_timer(NULL),
     ui(new Ui::Synchronous_Dialog)
 {
     ui->setupUi(this);
@@ -107,6 +108,11 @@ void Synchronous_Dialog::Initialize()
 ///
 void Synchronous_Dialog::InitializeTimer()
 {
+    if (m_timer)
+    {
+        delete m_timer;
+        m_timer = NULL;
+    }
     m_timer = new QTimer();
     connect(m_timer, SIGNAL(timeout()), this, SLOT(OnTimerTicked()));
     connect(m_timer, SIGNAL(timeout()), m_timer, SLOT(start()));
@@ -165,7 +171,7 @@ void Synchronous_Dialog::Uninitialize()
 {
     if (m_timer)
     {
-        delete m_timer;
+        m_timer->deleteLater();
     }
 }
 
@@ -218,22 +224,21 @@ void SynchronousWorker::Process()
         for (int i = 0; i < m_round; i++)
         {
             p_locker->lock();
+            while (*p_turn != m_id)
+            {
+                p_curCond->wait(p_locker);
+            }
+
             (*p_income)++;
             (*p_turn) = ((*p_turn) + 1) % NUMBER_OF_THREADS;
-            p_locker->unlock();
-
-            /*
-            int sign = RandomValue(0, 1);
-            int cash = RandomValue(1, 10);
-            p_locker->lock();
-            (*p_income) += sign ? -cash : cash;
-            p_locker->unlock();
-            */
 
             qDebug() << m_id << " " << i << " " << *p_turn << " " << *p_income;
+
+            p_nextCond->notify_one();
+            p_locker->unlock();
         }
     }
 
-    emit Finished();
     emit Finished(m_id);
+    emit Finished();
 }
