@@ -74,6 +74,7 @@ public slots:
     void OnProgressUpdated(int id, int percent);
     void OnButtonStartClicked();
     void OnThreadFinished(int id);
+    void ResetUI();
     void ResetThreads();
 
 private:

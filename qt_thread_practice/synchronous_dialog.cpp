@@ -78,7 +78,20 @@ void Synchronous_Dialog::OnThreadFinished(int id)
     if (all_done)
     {
         ResetThreads();
+        ResetUI();
     }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+/// \brief Synchronous_Dialog::ResetUI
+///
+void Synchronous_Dialog::ResetUI()
+{
+    for (int i = 0; i < m_progress_bars.size(); i++)
+    {
+        m_progress_bars[i]->setValue(m_progress_bars[i]->minimum());
+    }
+    ui->button_start->setEnabled(true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -99,8 +112,6 @@ void Synchronous_Dialog::ResetThreads()
     m_threads.clear();
     m_conditions.clear();
     InitializeThreads();
-
-    ui->button_start->setEnabled(true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
