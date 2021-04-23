@@ -130,18 +130,14 @@ namespace SynchronousExamples
 		{
 			SampleWorker* worker = (SampleWorker*)arg;
 
-			worker->mtx = CreateMutex(NULL, FALSE, TEXT("sample_worker_mutex"));
-			worker->sem = CreateSemaphore(NULL, 0, 2, TEXT("sample_worker_semaphore"));
-			
 			memset(worker->shared_data, 0, 1024);
-
-			Sleep(100);
 			SetEvent(worker->init_steps[0]);
-			Sleep(100);
+
+			worker->mtx = CreateMutex(NULL, FALSE, TEXT("sample_worker_mutex"));
 			SetEvent(worker->init_steps[1]);
-			Sleep(100);
+
+			worker->sem = CreateSemaphore(NULL, 0, 2, TEXT("sample_worker_semaphore"));
 			SetEvent(worker->init_steps[2]);
-			Sleep(100);
 		}
 
 		static void PossessSharedData(void* arg)
