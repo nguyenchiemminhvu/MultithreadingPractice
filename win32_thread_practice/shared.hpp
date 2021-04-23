@@ -133,13 +133,13 @@ namespace SynchronousExamples
 			
 			memset(worker->shared_data, 0, 1024);
 
-			Sleep(1000);
+			Sleep(100);
 			SetEvent(worker->init_steps[0]);
-			Sleep(1000);
+			Sleep(100);
 			SetEvent(worker->init_steps[1]);
-			Sleep(1000);
+			Sleep(100);
 			SetEvent(worker->init_steps[2]);
-			Sleep(1000);
+			Sleep(100);
 		}
 
 		static void PossessSharedData(void* arg)
