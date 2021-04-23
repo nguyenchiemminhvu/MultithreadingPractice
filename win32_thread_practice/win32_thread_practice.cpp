@@ -5,7 +5,8 @@
 
 int main()
 {
-	SampleWin32Threads::RunSampleWorker();
+	//SampleWin32Threads::RunSampleWorker();
+	SynchronousExamples::RunExamples();
 
 	return 0;
 }
