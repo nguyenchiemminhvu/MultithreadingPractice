@@ -95,7 +95,6 @@ namespace SynchronousExamples
 		void Run()
 		{
 			int rc;
-			int check_all_done = 0b111;
 
 			HANDLE t = (HANDLE)_beginthread(&SampleWorker::Initialize, 0, (void*)init_steps);
 
@@ -104,17 +103,14 @@ namespace SynchronousExamples
 			switch (rc)
 			{
 			case WAIT_OBJECT_0 + 0:
-				check_all_done &= 0b110;
 				wprintf(L"Done step 1");
 				break;
 
 			case WAIT_OBJECT_0 + 1:
-				check_all_done &= 0b101;
 				wprintf(L"Done step 2");
 				break;
 
 			case WAIT_OBJECT_0 + 2:
-				check_all_done &= 0b011;
 				wprintf(L"Done step 3");
 				break;
 
