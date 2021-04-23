@@ -83,6 +83,7 @@ namespace SynchronousExamples
 		HANDLE init_steps[3];
 		HANDLE threads[3];
 		HANDLE mtx;
+		HANDLE sem;
 
 		SampleWorker()
 		{
@@ -130,6 +131,7 @@ namespace SynchronousExamples
 			SampleWorker* worker = (SampleWorker*)arg;
 
 			worker->mtx = CreateMutex(NULL, FALSE, TEXT("sample_worker_mutex"));
+			worker->sem = CreateSemaphore(NULL, 0, 2, TEXT("sample_worker_semaphore"));
 			
 			memset(worker->shared_data, 0, 1024);
 
@@ -154,6 +156,7 @@ namespace SynchronousExamples
 				__try
 				{
 					int id = GetCurrentThreadId();
+					memset(worker->shared_data, 0, 1024);
 					sprintf(worker->shared_data, "#%d said: I am the one", id);
 
 					printf("%s\n", worker->shared_data);
