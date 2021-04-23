@@ -76,9 +76,14 @@ namespace SynchronousExamples
 {
 	class SampleWorker
 	{
-		HANDLE init_steps[3];
-
 	public:
+
+		char shared_data[1024];
+
+		HANDLE init_steps[3];
+		HANDLE threads[3];
+		HANDLE mtx;
+
 		SampleWorker()
 		{
 			for (int i = 0; i < 3; i++)
@@ -96,28 +101,9 @@ namespace SynchronousExamples
 		{
 			int rc;
 
-			HANDLE t = (HANDLE)_beginthread(&SampleWorker::Initialize, 0, (void*)init_steps);
+			HANDLE t = (HANDLE)_beginthread(&SampleWorker::Initialize, 0, (void*)this);
 
 			rc = WaitForMultipleObjects(3, init_steps, TRUE, INFINITE);
-			
-			switch (rc)
-			{
-			case WAIT_OBJECT_0 + 0:
-				wprintf(L"Done step 1");
-				break;
-
-			case WAIT_OBJECT_0 + 1:
-				wprintf(L"Done step 2");
-				break;
-
-			case WAIT_OBJECT_0 + 2:
-				wprintf(L"Done step 3");
-				break;
-
-			case WAIT_TIMEOUT:
-				wprintf(L"timed out\n");
-				break;
-			}
 
 			for (int i = 0; i < 3; i++)
 			{
@@ -127,19 +113,61 @@ namespace SynchronousExamples
 					wprintf(L"close event's handle failed with code: %d", GetLastError());
 				}
 			}
+
+			for (int i = 0; i < 3; i++)
+			{
+				threads[i] = (HANDLE)_beginthread(&SampleWorker::PossessSharedData, 0, (void*)this);
+			}
+
+			for (int i = 0; i < 3; i++)
+			{
+				WaitForSingleObject(threads[i], INFINITE);
+			}
 		}
 
 		static void Initialize(void * arg)
 		{
-			HANDLE* steps = (HANDLE*)arg;
+			SampleWorker* worker = (SampleWorker*)arg;
+
+			worker->mtx = CreateMutex(NULL, FALSE, TEXT("sample_worker_mutex"));
+			
+			memset(worker->shared_data, 0, 1024);
 
 			Sleep(1000);
-			SetEvent(steps[0]);
+			SetEvent(worker->init_steps[0]);
 			Sleep(1000);
-			SetEvent(steps[1]);
+			SetEvent(worker->init_steps[1]);
 			Sleep(1000);
-			SetEvent(steps[2]);
+			SetEvent(worker->init_steps[2]);
 			Sleep(1000);
+		}
+
+		static void PossessSharedData(void* arg)
+		{
+			SampleWorker* worker = (SampleWorker*)arg;
+
+			int rc = WaitForSingleObject(worker->mtx, INFINITE);
+
+			switch (rc)
+			{
+			case WAIT_OBJECT_0:
+				__try
+				{
+					int id = GetCurrentThreadId();
+					sprintf(worker->shared_data, "#%d said: I am the one", id);
+
+					printf("%s\n", worker->shared_data);
+				}
+				__finally
+				{
+					ReleaseMutex(worker->mtx);
+				}
+				break;
+
+			default:
+				ReleaseMutex(worker->mtx);
+				break;
+			}
 		}
 	};
 
