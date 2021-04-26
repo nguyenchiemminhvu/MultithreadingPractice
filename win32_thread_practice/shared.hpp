@@ -81,7 +81,7 @@ namespace SynchronousExamples
 		char shared_data[1024];
 
 		HANDLE init_steps[3];
-		HANDLE threads[3];
+		HANDLE working_threads[3];
 		HANDLE mtx;
 		HANDLE sem;
 
@@ -102,7 +102,7 @@ namespace SynchronousExamples
 		{
 			int rc;
 
-			HANDLE t = (HANDLE)_beginthread(&SampleWorker::Initialize, 0, (void*)this);
+			HANDLE init_thread = (HANDLE)_beginthread(&SampleWorker::Initialize, 0, (void*)this);
 
 			rc = WaitForMultipleObjects(3, init_steps, TRUE, INFINITE);
 
@@ -117,12 +117,12 @@ namespace SynchronousExamples
 
 			for (int i = 0; i < 3; i++)
 			{
-				threads[i] = (HANDLE)_beginthread(&SampleWorker::PossessSharedData, 0, (void*)this);
+				working_threads[i] = (HANDLE)_beginthread(&SampleWorker::PossessSharedData, 0, (void*)this);
 			}
 
 			for (int i = 0; i < 3; i++)
 			{
-				WaitForSingleObject(threads[i], INFINITE);
+				WaitForSingleObject(working_threads[i], INFINITE);
 			}
 		}
 
@@ -153,7 +153,7 @@ namespace SynchronousExamples
 				{
 					int id = GetCurrentThreadId();
 					memset(worker->shared_data, 0, 1024);
-					sprintf(worker->shared_data, "#%d said: I am the one", id);
+					sprintf(worker->shared_data, "#%d said: I control this buffer", id);
 
 					printf("%s\n", worker->shared_data);
 				}
