@@ -252,6 +252,15 @@ namespace ProducerAndConsumer
 	class SampleWorker
 	{
 	public:
+		BOOL force_stop;
+
+		INT count_produced_items;
+		INT count_consumed_items;
+
+		CRITICAL_SECTION locker;
+		CONDITION_VARIABLE need_to_produce;
+		CONDITION_VARIABLE ready_to_consume;
+
 		SampleWorker()
 		{
 
@@ -264,7 +273,59 @@ namespace ProducerAndConsumer
 
 		void Run()
 		{
+			InitializeConditionVariable(&need_to_produce);
+			InitializeConditionVariable(&ready_to_consume);
+			InitializeCriticalSection(&locker);
 
+			HANDLE h_produce = (HANDLE)_beginthread(&SampleWorker::ProduceProc, 0, (void*)this);
+			HANDLE h_consume = (HANDLE)_beginthread(&SampleWorker::ConsumeProc, 0, (void*)this);
+
+			getchar();
+
+			EnterCriticalSection(&locker);
+			force_stop = TRUE;
+			LeaveCriticalSection(&locker);
+
+			WaitForSingleObject(h_produce, INFINITE);
+			WaitForSingleObject(h_consume, INFINITE);
+		}
+
+		static void ProduceProc(void* arg)
+		{
+			SampleWorker* worker = (SampleWorker*)arg;
+
+			while (true)
+			{
+				if (worker->force_stop)
+				{
+					break;
+				}
+
+				EnterCriticalSection(&worker->locker);
+
+
+
+				LeaveCriticalSection(&worker->locker);
+			}
+		}
+
+		static void ConsumeProc(void* arg)
+		{
+			SampleWorker* worker = (SampleWorker*)arg;
+
+			while (true)
+			{
+				if (worker->force_stop)
+				{
+					break;
+				}
+
+				EnterCriticalSection(&worker->locker);
+
+
+
+				LeaveCriticalSection(&worker->locker);
+			}
 		}
 	};
 
