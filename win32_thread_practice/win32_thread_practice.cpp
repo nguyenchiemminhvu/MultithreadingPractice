@@ -6,7 +6,8 @@
 int main()
 {
 	//SampleWin32Threads::RunSampleWorker();
-	SynchronousExamples::RunExamples();
+	//SynchronousExamples::RunExamples();
+	ProducerAndConsumer::ProduceAndConsume();
 
 	return 0;
 }

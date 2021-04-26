@@ -246,3 +246,31 @@ namespace SynchronousExamples
 		worker.Run();
 	}
 }
+
+namespace ProducerAndConsumer
+{
+	class SampleWorker
+	{
+	public:
+		SampleWorker()
+		{
+
+		}
+
+		~SampleWorker()
+		{
+
+		}
+
+		void Run()
+		{
+
+		}
+	};
+
+	void ProduceAndConsume()
+	{
+		SampleWorker worker;
+		worker.Run();
+	}
+}
