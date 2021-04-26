@@ -80,16 +80,22 @@ namespace SynchronousExamples
 
 		char shared_data[1024];
 
-		HANDLE init_steps[3];
-		HANDLE working_threads[3];
+		HANDLE steps[3];
+		HANDLE possess_threads[3];
+		HANDLE print_threads[3];
+
+		int count_mtx;
+		int count_sem;
 		HANDLE mtx;
 		HANDLE sem;
 
 		SampleWorker()
 		{
+			count_mtx = count_sem = 0;
+
 			for (int i = 0; i < 3; i++)
 			{
-				init_steps[i] = CreateEvent(NULL, true, false, NULL);
+				steps[i] = CreateEvent(NULL, true, false, NULL);
 			}
 		}
 
@@ -103,27 +109,32 @@ namespace SynchronousExamples
 			int rc;
 
 			HANDLE init_thread = (HANDLE)_beginthread(&SampleWorker::Initialize, 0, (void*)this);
+			HANDLE uninit_thread = (HANDLE)_beginthread(&SampleWorker::Uninitialize, 0, (void*)this);
 
-			rc = WaitForMultipleObjects(3, init_steps, TRUE, INFINITE);
-
+			rc = WaitForSingleObject(steps[0], INFINITE);
 			for (int i = 0; i < 3; i++)
 			{
-				rc = CloseHandle(init_steps[i]);
-				if (rc == 0)
-				{
-					wprintf(L"close event's handle failed with code: %d", GetLastError());
-				}
+				possess_threads[i] = (HANDLE)_beginthread(&SampleWorker::PossessSharedData, 0, (void*)this);
 			}
 
 			for (int i = 0; i < 3; i++)
 			{
-				working_threads[i] = (HANDLE)_beginthread(&SampleWorker::PossessSharedData, 0, (void*)this);
+				WaitForSingleObject(possess_threads[i], INFINITE);
+			}
+
+			rc = WaitForSingleObject(steps[1], INFINITE);
+			for (int i = 0; i < 3; i++)
+			{
+				print_threads[i] = (HANDLE)_beginthread(&SampleWorker::PrintSharedData, 0, (void*)this);
 			}
 
 			for (int i = 0; i < 3; i++)
 			{
-				WaitForSingleObject(working_threads[i], INFINITE);
+				WaitForSingleObject(print_threads[i], INFINITE);
 			}
+
+			WaitForSingleObject(init_thread, INFINITE);
+			WaitForSingleObject(uninit_thread, INFINITE);
 		}
 
 		static void Initialize(void * arg)
@@ -131,13 +142,38 @@ namespace SynchronousExamples
 			SampleWorker* worker = (SampleWorker*)arg;
 
 			memset(worker->shared_data, 0, 1024);
-			SetEvent(worker->init_steps[0]);
 
 			worker->mtx = CreateMutex(NULL, FALSE, TEXT("sample_worker_mutex"));
-			SetEvent(worker->init_steps[1]);
+			worker->sem = CreateSemaphore(NULL, 2, 2, TEXT("sample_worker_semaphore"));
 
-			worker->sem = CreateSemaphore(NULL, 0, 2, TEXT("sample_worker_semaphore"));
-			SetEvent(worker->init_steps[2]);
+			SetEvent(worker->steps[0]);
+		}
+
+		static void Uninitialize(void * arg)
+		{
+			SampleWorker* worker = (SampleWorker*)arg;
+
+			int rc = WaitForMultipleObjects(3, (HANDLE*)worker->steps, TRUE, INFINITE);
+			for (int i = 0; i < 3; i++)
+			{
+				rc = CloseHandle(worker->steps[i]);
+				if (rc == 0)
+				{
+					wprintf(L"close init_steps handle failed with code: %d", GetLastError());
+				}
+			}
+
+			rc = CloseHandle(worker->mtx);
+			if (rc == 0)
+			{
+				wprintf(L"close mutex handle failed with code: %d", GetLastError());
+			}
+
+			rc = CloseHandle(worker->sem);
+			if (rc == 0)
+			{
+				wprintf(L"close semaphore handle failed with code: %d", GetLastError());
+			}
 		}
 
 		static void PossessSharedData(void* arg)
@@ -154,8 +190,6 @@ namespace SynchronousExamples
 					int id = GetCurrentThreadId();
 					memset(worker->shared_data, 0, 1024);
 					sprintf(worker->shared_data, "#%d said: I control this buffer", id);
-
-					printf("%s\n", worker->shared_data);
 				}
 				__finally
 				{
@@ -166,6 +200,42 @@ namespace SynchronousExamples
 			default:
 				ReleaseMutex(worker->mtx);
 				break;
+			}
+
+			worker->count_mtx++;
+			if (worker->count_mtx == 3)
+			{
+				SetEvent(worker->steps[1]);
+			}
+		}
+
+		static void PrintSharedData(void* arg)
+		{
+			SampleWorker* worker = (SampleWorker*)arg;
+
+			int rc;
+
+			rc = WaitForSingleObject(worker->sem, INFINITE);
+			switch (rc)
+			{
+			case WAIT_OBJECT_0:
+				Sleep(2000);
+				printf("#%d: %s\n", GetCurrentThreadId(), worker->shared_data);
+				if (!ReleaseSemaphore(worker->sem, 1, NULL))
+				{
+					printf("ReleaseSemaphore failed with code: %d\n", GetLastError());
+				}
+				break;
+
+			case WAIT_TIMEOUT:
+				printf("#%d: timed out\n", GetCurrentThreadId());
+				break;
+			}
+
+			worker->count_sem++;
+			if (worker->count_sem == 3)
+			{
+				SetEvent(worker->steps[2]);
 			}
 		}
 	};
