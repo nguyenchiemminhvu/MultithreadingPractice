@@ -289,6 +289,8 @@ namespace ProducerAndConsumer
 
 			WaitForSingleObject(h_produce, INFINITE);
 			WaitForSingleObject(h_consume, INFINITE);
+
+			printf("Available items: %d\nConsumed items: %d\n", count_produced_items, count_consumed_items);
 		}
 
 		static void ProduceProc(void* arg)
@@ -304,9 +306,21 @@ namespace ProducerAndConsumer
 
 				EnterCriticalSection(&worker->locker);
 
+				while (worker->count_produced_items >= 12)
+				{
+					SleepConditionVariableCS(&worker->need_to_produce, &worker->locker, INFINITE);
+				}
 
+				Sleep(100);
+
+				worker->count_produced_items++;
 
 				LeaveCriticalSection(&worker->locker);
+
+				if (worker->count_produced_items >= 12)
+				{
+					WakeConditionVariable(&worker->ready_to_consume);
+				}
 			}
 		}
 
@@ -323,9 +337,22 @@ namespace ProducerAndConsumer
 
 				EnterCriticalSection(&worker->locker);
 
+				while (worker->count_produced_items < 12)
+				{
+					SleepConditionVariableCS(&worker->ready_to_consume, &worker->locker, INFINITE);
+				}
 
+				Sleep(100);
+
+				worker->count_consumed_items++;
+				worker->count_produced_items -= 12;
 
 				LeaveCriticalSection(&worker->locker);
+
+				if (worker->count_produced_items < 12)
+				{
+					WakeConditionVariable(&worker->need_to_produce);
+				}
 			}
 		}
 	};
