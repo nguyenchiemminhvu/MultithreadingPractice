@@ -263,7 +263,12 @@ namespace ProducerAndConsumer
 
 		SampleWorker()
 		{
+			force_stop = false;
+			count_produced_items = count_consumed_items = 0;
 
+			InitializeConditionVariable(&need_to_produce);
+			InitializeConditionVariable(&ready_to_consume);
+			InitializeCriticalSection(&locker);
 		}
 
 		~SampleWorker()
@@ -273,10 +278,6 @@ namespace ProducerAndConsumer
 
 		void Run()
 		{
-			InitializeConditionVariable(&need_to_produce);
-			InitializeConditionVariable(&ready_to_consume);
-			InitializeCriticalSection(&locker);
-
 			HANDLE h_produce = (HANDLE)_beginthread(&SampleWorker::ProduceProc, 0, (void*)this);
 			HANDLE h_consume = (HANDLE)_beginthread(&SampleWorker::ConsumeProc, 0, (void*)this);
 
